@@ -1,0 +1,74 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Welcome to AlumniSphere | Elevate Your Network{% endblock %}
+
+{% block content %}
+<!-- Hero Interactive Module -->
+<section class="hero-section text-center">
+    <div class="container">
+        <span class="badge rounded-pill bg-indigo-subtle text-indigo px-3 py-2 mb-3 fw-semibold" style="background-color: #e0e7ff;">Introducing AlumniSphere 1.0</span>
+        <h1 class="hero-title text-dark">Where Institutional Legacy Meets <br><span class="text-indigo">Professional Opportunity</span></h1>
+        <p class="hero-subtitle">Bridge the gap between current university students and established global alumni. Share opportunities, book industry mentorships, and accelerate your career trajectory.</p>
+        <div>
+            <a href="#" class="btn btn-indigo text-white btn-lg px-4 me-3 fs-6">Explore the Directory</a>
+            <a href="#features" class="btn btn-outline-indigo btn-lg px-4 fs-6">See How It Works</a>
+        </div>
+    </div>
+</section>
+
+<!-- Stats Dash Grid -->
+<section id="stats" class="py-5 bg-light border-top border-bottom">
+    <div class="container">
+        <div class="row g-4 text-center">
+            <div class="col-md-4">
+                <h3 class="fw-bold text-indigo mb-1 fs-1">5,000+</h3>
+                <p class="text-muted small fw-medium text-uppercase tracking-wider">Verified Alumni</p>
+            </div>
+            <div class="col-md-4">
+                <h3 class="fw-bold text-dark mb-1 fs-1">120+</h3>
+                <p class="text-muted small fw-medium text-uppercase tracking-wider">Mentorship Tracks</p>
+            </div>
+            <div class="col-md-4">
+                <h3 class="fw-bold text-dark mb-1 fs-1">450+</h3>
+                <p class="text-muted small fw-medium text-uppercase tracking-wider">Jobs & Internships Posted</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Features Grid System -->
+<section id="features" class="py-5 my-5">
+    <div class="container">
+        <div class="text-center mb-5">
+            <h2 class="fw-bold text-dark fs-2">Engineered for Structural Networking</h2>
+            <p class="text-muted">Everything you need to turn college connections into real enterprise value.</p>
+        </div>
+        <div class="row g-4">
+            <!-- Feature 1 -->
+            <div class="col-md-4">
+                <div class="premium-card h-100">
+                    <div class="icon-wrapper">⚿</div>
+                    <h4 class="fw-bold text-dark fs-5 mb-3">Verified Profiles</h4>
+                    <p class="text-muted small lh-base mb-0">Secure registration parameters separating student paths from verified institutional alumni credentials.</p>
+                </div>
+            </div>
+            <!-- Feature 2 -->
+            <div class="col-md-4">
+                <div class="premium-card h-100">
+                    <div class="icon-wrapper">⚡</div>
+                    <h4 class="fw-bold text-dark fs-5 mb-3">Direct Mentorship</h4>
+                    <p class="text-muted small lh-base mb-0">Skip the generic cold emails. Seamlessly request structured informational interviews and portfolio critiques directly.</p>
+                </div>
+            </div>
+            <!-- Feature 3 -->
+            <div class="col-md-4">
+                <div class="premium-card h-100">
+                    <div class="icon-wrapper">💼</div>
+                    <h4 class="fw-bold text-dark fs-5 mb-3">Opportunity Pipeline</h4>
+                    <p class="text-muted small lh-base mb-0">Internal job and internship board populated directly by working alumni within elite modern tech ecosystems.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

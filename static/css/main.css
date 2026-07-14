@@ -1,0 +1,109 @@
+/* Custom Global Tokens */
+:root {
+    --primary-indigo: #4f46e5;
+    --primary-hover: #4338ca;
+    --text-slate: #1e293b;
+    --text-muted: #64748b;
+    --bg-light: #f8fafc;
+    --soft-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.05), 0 2px 4px -2px rgb(0 0 0 / 0.05);
+    --card-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.05), 0 4px 6px -4px rgb(0 0 0 / 0.05);
+}
+
+body {
+    font-family: 'Inter', sans-serif;
+    color: var(--text-slate);
+    background-color: #ffffff;
+    overflow-x: hidden;
+}
+
+/* Custom Component Classes overriding raw Bootstrap looks */
+.text-indigo {
+    color: var(--primary-indigo) !important;
+}
+
+.navbar-custom {
+    background-color: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.btn-indigo {
+    background-color: var(--primary-indigo);
+    border-color: var(--primary-indigo);
+    padding: 0.6rem 1.2rem;
+    font-weight: 500;
+    border-radius: 6px;
+    transition: all 0.2s ease;
+}
+
+.btn-indigo:hover {
+    background-color: var(--primary-hover);
+    border-color: var(--primary-hover);
+    transform: translateY(-1px);
+}
+
+.btn-outline-indigo {
+    color: var(--primary-indigo);
+    border-color: #c7d2fe;
+    padding: 0.6rem 1.2rem;
+    font-weight: 500;
+    border-radius: 6px;
+    transition: all 0.2s ease;
+}
+
+.btn-outline-indigo:hover {
+    background-color: #f5f3ff;
+    color: var(--primary-hover);
+    border-color: var(--primary-indigo);
+}
+
+/* Hero Section Branding */
+.hero-section {
+    padding: 7rem 0 5rem 0;
+    background: radial-gradient(100% 100% at 50% 0%, rgba(79, 70, 229, 0.05) 0%, rgba(255, 255, 255, 0) 100%);
+}
+
+.hero-title {
+    font-weight: 800;
+    letter-spacing: -0.025em;
+    font-size: 3.5rem;
+    line-height: 1.15;
+}
+
+.hero-subtitle {
+    color: var(--text-muted);
+    font-size: 1.25rem;
+    max-width: 600px;
+    margin: 1.5rem auto 2.5rem auto;
+}
+
+/* SaaS Card Component Layouts */
+.premium-card {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 2.5rem 2rem;
+    box-shadow: var(--soft-shadow);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.premium-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--card-shadow);
+    border-color: #cbd5e1;
+}
+
+.icon-wrapper {
+    width: 48px;
+    height: 48px;
+    background-color: #e0e7ff;
+    color: var(--primary-indigo);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 1.25rem;
+    margin-bottom: 1.5rem;
+}
