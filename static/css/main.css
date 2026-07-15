@@ -107,3 +107,45 @@ body {
     font-size: 1.25rem;
     margin-bottom: 1.5rem;
 }
+/* Auth Layout Wrapper */
+.auth-container {
+    max-width: 440px;
+    margin: 5rem auto;
+}
+
+.auth-card {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 2.5rem;
+    box-shadow: var(--card-shadow);
+}
+
+.form-label {
+    font-weight: 500;
+    font-size: 0.875rem;
+    color: var(--text-slate);
+}
+
+.form-control-custom {
+    display: block;
+    width: 100%;
+    padding: 0.6rem 0.875rem;
+    font-size: 0.95rem;
+    font-weight: 400;
+    line-height: 1.5;
+    color: var(--text-slate);
+    background-color: #fff;
+    background-clip: padding-box;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
+
+.form-control-custom:focus {
+    color: var(--text-slate);
+    background-color: #fff;
+    border-color: var(--primary-indigo);
+    outline: 0;
+    box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.1);
+}

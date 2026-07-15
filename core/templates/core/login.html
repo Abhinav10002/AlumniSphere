@@ -1,0 +1,37 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Sign In | AlumniSphere{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="auth-container">
+        <div class="auth-card">
+            <h3 class="fw-bold text-dark text-center mb-1">Welcome back</h3>
+            <p class="text-muted text-center small mb-4">Enter your credentials to access your portal</p>
+
+            {% if error %}
+            <div class="alert alert-danger py-2 px-3 small rounded-3 mb-3" role="alert">
+                {{ error }}
+            </div>
+            {% endif %}
+
+            <form method="POST" novalidate>
+                {% csrf_token %}
+                <div class="mb-3">
+                    <label for="username" class="form-label">Username</label>
+                    <input type="text" name="username" id="username" class="form-control-custom" placeholder="alex_doe" required>
+                </div>
+                <div class="mb-4">
+                    <label for="password" class="form-label">Password</label>
+                    <input type="password" name="password" id="password" class="form-control-custom" placeholder="••••••••" required>
+                </div>
+                <button type="submit" class="btn btn-indigo text-white w-100 py-2 mb-3">Sign In</button>
+            </form>
+
+            <p class="text-center text-muted small mb-0">
+                New to the platform? <a href="{% url 'register' %}" class="text-indigo text-decoration-none fw-medium">Create an account</a>
+            </p>
+        </div>
+    </div>
+</div>
+{% endblock %}

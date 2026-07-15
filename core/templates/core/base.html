@@ -25,11 +25,16 @@
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto align-items-center">
-                    <li class="nav-item"><a class="nav-link px-3" href="#features">Features</a></li>
-                    <li class="nav-item"><a class="nav-link px-3" href="#stats">Impact</a></li>
-                    <li class="nav-item"><a class="btn btn-outline-indigo me-2 ms-2" href="#">Login</a></li>
-                    <li class="nav-item"><a class="btn btn-indigo text-white" href="#">Join Network</a></li>
-                </ul>
+    <li class="nav-item"><a class="nav-link px-3" href="#features">Features</a></li>
+    <li class="nav-item"><a class="nav-link px-3" href="#stats">Impact</a></li>
+    {% if user.is_authenticated %}
+        <li class="nav-item"><span class="nav-link px-3 text-dark fw-medium">Hi, {{ user.username }}</span></li>
+        <li class="nav-item"><a class="btn btn-outline-indigo ms-2" href="{% url 'logout' %}">Logout</a></li>
+    {% else %}
+        <li class="nav-item"><a class="btn btn-outline-indigo me-2 ms-2" href="{% url 'login' %}">Login</a></li>
+        <li class="nav-item"><a class="btn btn-indigo text-white" href="{% url 'register' %}">Join Network</a></li>
+    {% endif %}
+</ul>
             </div>
         </div>
     </nav>
