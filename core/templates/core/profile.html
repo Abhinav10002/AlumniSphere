@@ -26,8 +26,20 @@
                             {% endif %}
                         </p>
                     </div>
+                    
+                    <!-- Dynamic Context-Aware Action Workspace -->
                     {% if request.user == profile_user %}
                         <a href="{% url 'edit_profile' %}" class="btn btn-outline-indigo btn-sm">Edit Profile Workspace</a>
+                    {% elif request.user.is_authenticated %}
+                        {% if connection_status == 'connected' %}
+                            <button class="btn btn-success btn-sm px-3" disabled>✓ Connected</button>
+                        {% elif connection_status == 'sent_pending' %}
+                            <button class="btn btn-outline-secondary btn-sm px-3" disabled>Request Pending</button>
+                        {% elif connection_status == 'received_pending' %}
+                            <a href="{% url 'accept_connection' username=profile_user.username %}" class="btn btn-indigo text-white btn-sm px-3">Accept Invitation</a>
+                        {% else %}
+                            <a href="{% url 'send_connection' username=profile_user.username %}" class="btn btn-indigo text-white btn-sm px-3">+ Connect</a>
+                        {% endif %}
                     {% endif %}
                 </div>
 

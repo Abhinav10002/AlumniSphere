@@ -9,4 +9,6 @@ urlpatterns = [
     path('directory/', views.directory_view, name='directory'),
     path('profile/edit/', views.edit_profile_view, name='edit_profile'),
     path('profile/<str:username>/', views.profile_view, name='profile'),
+    path('connect/send/<str:username>/', views.send_connection_request, name='send_connection'),
+    path('connect/accept/<str:username>/', views.accept_connection_request, name='accept_connection'),
 ]
