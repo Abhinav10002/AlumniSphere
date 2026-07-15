@@ -87,3 +87,34 @@ def edit_profile_view(request):
         return redirect('profile', username=request.user.username)
         
     return render(request, 'core/edit_profile.html')
+
+def profile_view(request, username):
+    """Fetches targeted context payload data for user showcase cards."""
+    profile_user = get_object_or_404(User, username=username)
+    return render(request, 'core/profile.html', {'profile_user': profile_user})
+
+@login_required
+def edit_profile_view(request):
+    """Processes modification state adjustments securely."""
+    if request.method == 'POST':
+        # Extrapolate POST values safely
+        request.user.first_name = request.POST.get('first_name')
+        request.user.last_name = request.POST.get('last_name')
+        request.user.save()
+        
+        profile = request.user.profile
+        profile.role = request.POST.get('role')
+        profile.bio = request.POST.get('bio')
+        profile.company = request.POST.get('company')
+        profile.job_title = request.POST.get('job_title')
+        
+        grad_year = request.POST.get('graduation_year')
+        profile.graduation_year = int(grad_year) if grad_year and grad_year.isdigit() else None
+        
+        profile.linkedin_url = request.POST.get('linkedin_url')
+        profile.github_url = request.POST.get('github_url')
+        profile.save()
+        
+        return redirect('profile', username=request.user.username)
+        
+    return render(request, 'core/edit_profile.html')

@@ -1,0 +1,71 @@
+{% extends 'core/base.html' %}
+
+{% block title %}{{ profile_user.username }}'s Profile | AlumniSphere{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <!-- Profile Hero Presentation Card -->
+            <div class="premium-card mb-4 position-relative">
+                <div class="d-flex align-items-center justify-content-between flex-wrap gap-3">
+                    <div>
+                        <div class="d-flex align-items-center gap-2 mb-2">
+                            <h2 class="fw-bold text-dark mb-0">{{ profile_user.first_name|default:profile_user.username }}</h2>
+                            {% if profile_user.profile.role == 'alumni' %}
+                                <span class="badge bg-success-subtle text-success border border-success-subtle px-2.5 py-1 text-uppercase tracking-wider font-monospace" style="font-size: 0.75rem;">Alumni</span>
+                            {% else %}
+                                <span class="badge bg-primary-subtle text-indigo border border-primary-subtle px-2.5 py-1 text-uppercase tracking-wider font-monospace" style="font-size: 0.75rem; background-color: #e0e7ff;">Student</span>
+                            {% endif %}
+                        </div>
+                        <p class="text-muted mb-0">
+                            {% if profile_user.profile.job_title %}
+                                {{ profile_user.profile.job_title }} at <strong class="text-dark">{{ profile_user.profile.company }}</strong>
+                            {% else %}
+                                Member of AlumniSphere Network
+                            {% endif %}
+                        </p>
+                    </div>
+                    {% if request.user == profile_user %}
+                        <a href="{% url 'edit_profile' %}" class="btn btn-outline-indigo btn-sm">Edit Profile Workspace</a>
+                    {% endif %}
+                </div>
+
+                <hr class="my-4" style="border-color: #e2e8f0;">
+
+                <div class="row g-3">
+                    <div class="col-sm-6">
+                        <span class="text-muted d-block small mb-0.5">Email Address</span>
+                        <span class="fw-medium">{{ profile_user.email }}</span>
+                    </div>
+                    <div class="col-sm-6">
+                        <span class="text-muted d-block small mb-0.5">Graduation Cohort</span>
+                        <span class="fw-medium">{{ profile_user.profile.graduation_year|default:"Not specified" }}</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Detailed Stats / Content Cards -->
+            <div class="premium-card">
+                <h5 class="fw-bold text-dark mb-3">Professional Biography</h5>
+                <p class="text-muted lh-relaxed mb-4">
+                    {{ profile_user.profile.bio|default:"This member hasn't compiled their operational biography parameters yet." }}
+                </p>
+
+                <h5 class="fw-bold text-dark mb-3">Professional Handles</h5>
+                <div class="d-flex gap-3">
+                    {% if profile_user.profile.linkedin_url %}
+                        <a href="{{ profile_user.profile.linkedin_url }}" target="_blank" class="text-indigo text-decoration-none small fw-medium">LinkedIn Profile ↗</a>
+                    {% endif %}
+                    {% if profile_user.profile.github_url %}
+                        <a href="{{ profile_user.profile.github_url }}" target="_blank" class="text-dark text-decoration-none small fw-medium">GitHub Profile ↗</a>
+                    {% endif %}
+                    {% if not profile_user.profile.linkedin_url and not profile_user.profile.github_url %}
+                        <span class="text-muted small italic">No social footprints mapped yet.</span>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

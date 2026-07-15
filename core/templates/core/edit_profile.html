@@ -1,0 +1,77 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Manage Workspace Profile | AlumniSphere{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="auth-card" style="max-width: 100%;">
+                <h3 class="fw-bold text-dark mb-1">Profile Configuration Workspace</h3>
+                <p class="text-muted small mb-4">Update your structural parameters to improve match visibility across the platform directory.</p>
+
+                <form method="POST" novalidate>
+                    {% csrf_token %}
+                    
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label">First Name</label>
+                            <input type="text" name="first_name" class="form-control-custom" value="{{ request.user.first_name }}">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Last Name</label>
+                            <input type="text" name="last_name" class="form-control-custom" value="{{ request.user.last_name }}">
+                        </div>
+                    </div>
+
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Network Role Orientation</label>
+                            <select name="role" class="form-control-custom">
+                                <option value="student" {% if request.user.profile.role == 'student' %}selected{% endif %}>Student</option>
+                                <option value="alumni" {% if request.user.profile.role == 'alumni' %}selected{% endif %}>Alumni</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Graduation Year</label>
+                            <input type="number" name="graduation_year" class="form-control-custom" value="{{ request.user.profile.graduation_year|default:'' }}" placeholder="2026">
+                        </div>
+                    </div>
+
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Current Company Enterprise</label>
+                            <input type="text" name="company" class="form-control-custom" value="{{ request.user.profile.company }}" placeholder="Stripe">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Functional Job Title</label>
+                            <input type="text" name="job_title" class="form-control-custom" value="{{ request.user.profile.job_title }}" placeholder="Systems Engineer">
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Biography Overview</label>
+                        <textarea name="bio" rows="4" class="form-control-custom" placeholder="Share your focus elements, stack specializations, or core industrial goals...">{{ request.user.profile.bio }}</textarea>
+                    </div>
+
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-6">
+                            <label class="form-label">LinkedIn Repository Connection</label>
+                            <input type="url" name="linkedin_url" class="form-control-custom" value="{{ request.user.profile.linkedin_url }}" placeholder="https://linkedin.com/in/username">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">GitHub Repository Connection</label>
+                            <input type="url" name="github_url" class="form-control-custom" value="{{ request.user.profile.github_url }}" placeholder="https://github.com/username">
+                        </div>
+                    </div>
+
+                    <div class="d-flex gap-2 justify-content-end">
+                        <a href="{% url 'profile' username=request.user.username %}" class="btn btn-outline-indigo">Cancel</a>
+                        <button type="submit" class="btn btn-indigo text-white px-4">Save Changes</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
