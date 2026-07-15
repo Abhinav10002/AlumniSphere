@@ -118,3 +118,22 @@ def edit_profile_view(request):
         return redirect('profile', username=request.user.username)
         
     return render(request, 'core/edit_profile.html')
+
+def directory_view(request):
+    """
+    Queries active system user accounts, optimizing data extraction paths
+    using select_related execution parameters.
+    """
+    role_filter = request.GET.get('role_filter', '').strip()
+    
+    # Use select_related to dramatically minimize database payload hits (1 query vs N queries)
+    user_query = User.objects.all().select_related('profile').filter(is_active=True)
+    
+    if role_filter in ['alumni', 'student']:
+        user_query = user_query.filter(profile__role=role_filter)
+        
+    context = {
+        'members': user_query,
+        'active_filter': role_filter
+    }
+    return render(request, 'core/directory.html', context)

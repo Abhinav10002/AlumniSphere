@@ -1,0 +1,66 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Network Directory | AlumniSphere{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row mb-5 align-items-center justify-content-between g-3">
+        <div class="col-md-6">
+            <h2 class="fw-bold text-dark mb-1">Global Network Directory</h2>
+            <p class="text-muted mb-0">Discover and bridge connections across your institution's legacy footprint.</p>
+        </div>
+        <!-- Role Quick-Filter Bar -->
+        <div class="col-md-4 text-md-end">
+            <form method="GET" action="{% url 'directory' %}" class="d-flex gap-2">
+                <select name="role_filter" class="form-control-custom font-medium" onchange="this.form.submit()">
+                    <option value="" {% if not active_filter %}selected{% endif %}>All Network Members</option>
+                    <option value="alumni" {% if active_filter == 'alumni' %}selected{% endif %}>Alumni Professionals</option>
+                    <option value="student" {% if active_filter == 'student' %}selected{% endif %}>Active Students</option>
+                </select>
+            </form>
+        </div>
+    </div>
+
+    <!-- Cards Layout Grid -->
+    <div class="row g-4">
+        {% for member in members %}
+            <div class="col-md-4 col-sm-6">
+                <div class="premium-card h-100 d-flex flex-column justify-content-between py-4 px-4">
+                    <div>
+                        <div class="d-flex align-items-start justify-content-between mb-3">
+                            <div>
+                                <h5 class="fw-bold text-dark mb-0.5">{{ member.first_name|default:member.username }}</h5>
+                                <span class="text-muted small">@{{ member.username }}</span>
+                            </div>
+                            {% if member.profile.role == 'alumni' %}
+                                <span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-0.5 text-uppercase font-monospace" style="font-size: 0.7rem;">Alumni</span>
+                            {% else %}
+                                <span class="badge bg-primary-subtle text-indigo border border-primary-subtle px-2 py-0.5 text-uppercase font-monospace" style="font-size: 0.7rem; background-color: #e0e7ff;">Student</span>
+                            {% endif %}
+                        </div>
+
+                        <p class="text-muted small lh-base mb-3">
+                            {% if member.profile.job_title %}
+                                {{ member.profile.job_title }} at <strong class="text-dark">{{ member.profile.company }}</strong>
+                            {% else %}
+                                Connecting via AlumniSphere Network parameters.
+                            {% endif %}
+                        </p>
+                    </div>
+
+                    <div class="pt-3 border-top d-flex align-items-center justify-content-between" style="border-color: #f1f5f9 !important;">
+                        <span class="text-muted small fw-medium">
+                            {% if member.profile.graduation_year %}Class of {{ member.profile.graduation_year }}{% endif %}
+                        </span>
+                        <a href="{% url 'profile' username=member.username %}" class="btn btn-outline-indigo btn-sm px-3" style="font-size: 0.8rem; padding: 0.35rem 0.75rem;">View Profile</a>
+                    </div>
+                </div>
+            </div>
+        {% empty %}
+            <div class="col-12 text-center py-5">
+                <p class="text-muted">No operational profiles found matching the chosen parameters.</p>
+            </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
