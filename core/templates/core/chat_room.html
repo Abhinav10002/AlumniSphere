@@ -1,0 +1,98 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Chat Session | AlumniSphere{% endblock %}
+
+{% block content %}
+<div class="container py-5 animate-fade-in" data-aos="fade-up">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="premium-card bg-white d-flex flex-column p-0" style="overflow: hidden; height: 75vh; min-height: 500px;">
+                
+                <!-- Chat Window Header Component -->
+                <div class="p-3 border-bottom d-flex align-items-center justify-content-between bg-light-subtle">
+                    <div class="d-flex align-items-center">
+                        <div class="me-3">
+                            {% if partner.profile.avatar %}
+                                <img src="{{ partner.profile.avatar.url }}" alt="Avatar" class="rounded-circle border" style="width: 44px; height: 44px; object-fit: cover;">
+                            {% elif chat_partner.profile.avatar %}
+                                <img src="{{ chat_partner.profile.avatar.url }}" alt="Avatar" class="rounded-circle border" style="width: 44px; height: 44px; object-fit: cover;">
+                            {% else %}
+                                <div class="rounded-circle bg-light d-flex align-items-center justify-content-center fw-bold text-secondary border" style="width: 44px; height: 44px; font-size: 1.1rem;">
+                                    {% if partner %}{{ partner.username|slice:":1"|upper }}{% else %}{{ chat_partner.username|slice:":1"|upper }}{% endif %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        <div>
+                            <h6 class="mb-0 fw-bold text-dark">
+                                @{% if partner %}{{ partner.username }}{% else %}{{ chat_partner.username }}{% endif %}
+                            </h6>
+                            <span class="text-xs text-muted">Direct Connection Thread</span>
+                        </div>
+                    </div>
+                    <div>
+                        <a href="{% url 'chat_dashboard' %}" class="btn btn-sm btn-outline-secondary px-3" style="border-radius: 6px;">&larr; Back to Inbox</a>
+                    </div>
+                </div>
+
+                <!-- Chat Messages Feed Viewport -->
+                <div id="chat-messages-box" class="flex-grow-1 p-4" style="overflow-y: auto; background-color: #fafbfd;">
+                    {% if messages %}
+                        {% for message in messages %}
+                            <div class="d-flex mb-3 {% if message.sender == request.user %}justify-content-end{% else %}justify-content-start{% endif %}">
+                                <div class="p-3 shadow-2xs text-sm" style="max-width: 70%; border-radius: 14px; 
+                                    {% if message.sender == request.user %}
+                                        background-color: var(--brand-indigo); color: #ffffff; border-bottom-right-radius: 4px;
+                                    {% else %}
+                                        background-color: #ffffff; color: var(--text-main); border: 1px solid var(--border-color); border-bottom-left-radius: 4px;
+                                    {% endif %}">
+                                    <p class="mb-1 text-wrap" style="word-break: break-word;">{{ message.content }}</p>
+                                    <div class="text-xs text-end {% if message.sender == request.user %}text-white-50{% else %}text-muted{% endif %}" style="font-size: 0.65rem;">
+                                        {{ message.timestamp|date:"G:i" }}
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    {% else %}
+                        <!-- Conversation Starter Fallback State -->
+                        <div class="h-100 d-flex flex-column align-items-center justify-content-center text-center py-5">
+                            <div class="mb-3 text-muted">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" fill="currentColor" class="bi bi-chat-heart text-secondary opacity-50" viewBox="0 0 16 16">
+                                    <path d="M8 15c4.418 0 8-3.134 8-7s-3.582-7-8-7-8 3.134-8 7c0 1.76.743 3.37 1.97 4.6-.097.382-.411 1.474-1.243 2.54a.5.5 0 0 0 .58.751 7 7 0 0 0 3.79-1.14c.73.17 1.496.249 2.26.25m0-1c-.638 0-1.277-.06-1.9-.177a.5.5 0 0 0-.416.103l-2.07 1.554C4.332 14.1 4.7 13.24 4.847 12.72a.5.5 0 0 0-.173-.526C3.498 11.272 2.857 10.007 2.857 8c0-3.314 2.302-6 5.143-6s5.143 2.686 5.143 6-2.302 6-5.143 6"/>
+                                </svg>
+                            </div>
+                            <h6 class="fw-bold text-dark">Start of a new conversation</h6>
+                            <p class="text-muted small px-3 mb-0" style="max-width: 320px;">Send a message below to break the ice and start networking!</p>
+                        </div>
+                    {% endif %}
+                </div>
+
+                <!-- Message Form Submission Container -->
+                <div class="p-3 border-top bg-white">
+                    <form method="POST" action="" class="d-flex gap-2">
+                        {% csrf_token %}
+                        <input type="text" name="content" placeholder="Type your message here..." class="form-control px-3 border" style="border-radius: 8px; font-size: 0.92rem;" required autocomplete="off">
+                        <button type="submit" class="btn btn-indigo d-flex align-items-center gap-2 px-4" style="border-radius: 8px;">
+                            <span>Send</span>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" class="bi bi-send-fill" viewBox="0 0 16 16">
+                                <path d="M15.964.686a.5.5 0 0 0-.65-.65L.767 5.855H.766l-.452.18a.5.5 0 0 0-.082.887l.41.26.001.002 4.995 3.178 3.178 4.995.002.002.26.41a.5.5 0 0 0 .886-.083zm-1.833 1.89L6.637 10.07l-.215-.338a.5.5 0 0 0-.154-.154l-.338-.215 7.494-7.494 1.178-.471z"/>
+                            </svg>
+                        </button>
+                    </form>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Dynamic Interface Execution Layer -->
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        var messageBox = document.getElementById("chat-messages-box");
+        if (messageBox) {
+            // Automatically pin view frame scrollbar to the bottommost message block
+            messageBox.scrollTop = messageBox.scrollHeight;
+        }
+    });
+</script>
+{% endblock %}

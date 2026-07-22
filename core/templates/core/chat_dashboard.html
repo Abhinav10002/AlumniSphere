@@ -1,0 +1,140 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Inbox Dashboard | AlumniSphere{% endblock %}
+
+{% block content %}
+<div class="container py-5 animate-fade-in" data-aos="fade-up">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            
+            <!-- Dashboard Header Section -->
+            <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3 mb-4">
+                <div>
+                    <h4 class="fw-bold text-dark mb-1" style="letter-spacing: -0.02em;">Messages</h4>
+                    <p class="text-muted small mb-0">Connect and collaborate with your Alumni network threads.</p>
+                </div>
+                
+                <!-- Premium Search Input Component -->
+                <div style="max-width: 320px; width: 100%;">
+                    <form method="GET" action="" class="position-relative">
+                        <input type="text" name="q" value="{{ query }}" placeholder="Search alumni by name..." class="form-control px-3 bg-white border" style="border-radius: 8px; font-size: 0.9rem; padding-right: 2.5rem;" autocomplete="off">
+                        <button type="submit" class="btn position-absolute top-50 end-0 translate-middle-y text-muted border-0 bg-transparent px-2.5">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-search" viewBox="0 0 16 16">
+                                <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0"/>
+                            </svg>
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Dynamic Search Results Segment -->
+            {% if query %}
+                <div class="mb-4">
+                    <div class="d-flex align-items-center justify-content-between mb-2">
+                        <span class="text-xs fw-bold text-uppercase tracking-wider text-muted">Search Results for "{{ query }}"</span>
+                        <a href="{% url 'chat_dashboard' %}" class="text-xs text-decoration-none text-indigo">Clear Results</a>
+                    </div>
+                    
+                    <div class="premium-card bg-white p-0" style="overflow: hidden;">
+                        {% if search_results %}
+                            <div class="list-group list-group-flush">
+                                {% for person in search_results %}
+                                    <a href="{% url 'chat_room' person.username %}" class="list-group-item list-group-item-action p-3 d-flex align-items-center justify-content-between border-bottom">
+                                        <div class="d-flex align-items-center">
+                                            <div class="rounded-circle bg-light d-flex align-items-center justify-content-center fw-bold text-secondary border me-3" style="width: 40px; height: 40px; font-size: 1rem;">
+                                                {{ person.username|slice:":1"|upper }}
+                                            </div>
+                                            <div>
+                                                <h6 class="mb-0 text-sm fw-semibold text-dark">
+                                                    {% if person.first_name %}{{ person.first_name }} {{ person.last_name }}{% else %}@{{ person.username }}{% endif %}
+                                                </h6>
+                                                <span class="text-xs text-muted">@{{ person.username }}</span>
+                                            </div>
+                                        </div>
+                                        <span class="btn btn-sm btn-light text-xs px-3" style="border-radius: 6px;">Message</span>
+                                    </a>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            <div class="p-4 text-center text-muted text-sm">
+                                No network accounts matching "{{ query }}" were discovered.
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+                <hr class="my-4 opacity-25">
+            {% endif %}
+
+            <!-- Active Conversation Threads Listing Container -->
+            <div class="premium-card bg-white p-0" style="overflow: hidden;">
+                <div class="p-3 border-bottom bg-light-subtle">
+                    <span class="text-xs fw-bold text-uppercase tracking-wider text-muted">Recent Discussions</span>
+                </div>
+                
+                {% if threads %}
+                    <div class="list-group list-group-flush">
+                        {% for thread in threads %}
+                            <a href="{% url 'chat_room' thread.partner.username %}" class="list-group-item list-group-item-action p-3 d-flex align-items-center justify-content-between border-bottom position-relative {% if thread.unread_count > 0 %}bg-light-subtle{% endif %}" style="transition: background-color 0.15s ease;">
+                                
+                                <div class="d-flex align-items-center flex-grow-1 min-w-0 me-3">
+                                    <div class="me-3 position-relative flex-shrink-0">
+                                        {% if thread.partner.profile.avatar %}
+                                            <img src="{{ thread.partner.profile.avatar.url }}" alt="Avatar" class="rounded-circle border" style="width: 48px; height: 48px; object-fit: cover;">
+                                        {% else %}
+                                            <div class="rounded-circle bg-light d-flex align-items-center justify-content-center fw-bold text-secondary border" style="width: 48px; height: 48px; font-size: 1.2rem;">
+                                                {{ thread.partner.username|slice:":1"|upper }}
+                                            </div>
+                                        {% endif %}
+                                        
+                                        {% if thread.unread_count > 0 %}
+                                            <span class="position-absolute top-0 start-100 translate-middle p-1.5 bg-danger border border-light rounded-circle animate-pulse">
+                                                <span class="visually-hidden">New alerts</span>
+                                            </span>
+                                        {% endif %}
+                                    </div>
+
+                                    <div class="min-w-0 flex-grow-1">
+                                        <div class="d-flex align-items-center justify-content-between mb-1">
+                                            <h6 class="mb-0 text-sm {% if thread.unread_count > 0 %}fw-bold text-dark{% else %}fw-semibold text-secondary{% endif %}">
+                                                @{{ thread.partner.username }}
+                                            </h6>
+                                            {% if thread.latest_message %}
+                                                <span class="text-xs text-muted ms-2">{{ thread.latest_message.timestamp|date:"M d, G:i" }}</span>
+                                            {% endif %}
+                                        </div>
+                                        <p class="mb-0 text-sm text-truncate {% if thread.unread_count > 0 %}fw-medium text-dark{% else %}text-muted{% endif %}" style="max-width: 90%;">
+                                            {% if thread.latest_message.sender == request.user %}You: {% endif %}{{ thread.latest_message.content }}
+                                        </p>
+                                    </div>
+                                </div>
+
+                                {% if thread.unread_count > 0 %}
+                                    <div class="flex-shrink-0 text-end">
+                                        <span class="badge rounded-pill bg-indigo text-xs px-2.5 py-1">
+                                            {{ thread.unread_count }} new
+                                        </span>
+                                    </div>
+                                {% endif %}
+
+                            </a>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <!-- Empty State Fallback -->
+                    <div class="text-center py-5 px-4">
+                        <div class="mb-3 text-muted">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" fill="currentColor" class="bi bi-chat-left-dots text-secondary opacity-25" viewBox="0 0 16 16">
+                                <path d="M14 1a1 1 0 0 1 1 1v8a1 1 0 0 1-1 1H4.414A2 2 0 0 0 3 11.586l-2 2V2a1 1 0 0 1 1-1zM2 0a2 2 0 0 0-2 2v12.793a.5.5 0 0 0 .854.353l2.853-2.853A1 1 0 0 1 4.414 12H14a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2z"/>
+                                <path d="M5 6a1 1 0 1 1-2 0 1 1 0 0 1 2 0m4 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0m4 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0"/>
+                            </svg>
+                        </div>
+                        <h5 class="fw-bold text-dark">No Active Discussions</h5>
+                        <p class="text-muted small mx-auto mb-0" style="max-width: 340px;">Use the search bar above to look up profiles and kick off a conversation.</p>
+                    </div>
+                {% endif %}
+            </div>
+            
+        </div>
+    </div>
+</div>
+{% endblock %}

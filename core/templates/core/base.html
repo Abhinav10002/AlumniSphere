@@ -3,57 +3,217 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}AlumniSphere - Connect & Grow{% endblock %}</title>
-    <!-- Google Fonts: Inter for that clean, premium SaaS look -->
+    <title>{% block title %}AlumniSphere{% endblock %}</title>
+    
+    <!-- Bootstrap 5 CSS Framework -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Google Fonts: Inter -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <!-- Bootstrap 5 CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Load Django Static Tag & Custom CSS System -->
-    {% load static %}
-    <link rel="stylesheet" href="{% static 'css/main.css' %}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- AOS Animation Stylesheet -->
+    <link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
+
+    <!-- Premium Light SaaS Design Matrix -->
+    <style>
+        :root {
+            --bg-main: #f8fafc;
+            --surface-card: #ffffff;
+            --brand-indigo: #4f46e5;
+            --brand-indigo-hover: #4338ca;
+            --brand-indigo-light: #eeebff;
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+            --border-color: #e2e8f0;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-main);
+            color: var(--text-main);
+            overflow-x: hidden;
+            letter-spacing: -0.02em;
+        }
+
+        /* Glassmorphic Sticky Header */
+        .navbar-custom {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border-bottom: 1px solid var(--border-color);
+            position: sticky;
+            top: 0;
+            z-index: 1020;
+        }
+
+        .navbar-brand {
+            font-weight: 800;
+            letter-spacing: -0.04em;
+            color: var(--text-main) !important;
+            font-size: 1.3rem;
+        }
+
+        .nav-link {
+            color: var(--text-muted) !important;
+            font-weight: 500;
+            font-size: 0.92rem;
+            transition: all 0.2s ease;
+        }
+
+        .nav-link:hover {
+            color: var(--brand-indigo) !important;
+        }
+
+        /* Modern Premium White Cards */
+        .premium-card {
+            background: var(--surface-card);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 2.5rem 2rem;
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05), 0 1px 2px -1px rgba(0, 0, 0, 0.05);
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .premium-card:hover {
+            transform: translateY(-6px);
+            border-color: rgba(79, 70, 229, 0.3);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
+        }
+
+        /* Gradient Typography */
+        .gradient-text {
+            background: linear-gradient(135deg, #0f172a 30%, #4f46e5 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: 800;
+        }
+
+        .stat-number {
+            font-size: 3.8rem;
+            font-weight: 800;
+            letter-spacing: -0.05em;
+            color: var(--brand-indigo);
+            line-height: 1;
+            margin-bottom: 0.5rem;
+        }
+
+        /* Buttons */
+        .btn-indigo {
+            background: var(--brand-indigo);
+            color: #ffffff;
+            font-weight: 600;
+            border: none;
+            border-radius: 8px;
+            padding: 0.75rem 1.75rem;
+            transition: all 0.2s ease;
+        }
+
+        .btn-indigo:hover {
+            background: var(--brand-indigo-hover);
+            transform: translateY(-1px);
+            color: #ffffff;
+        }
+
+        .btn-outline-indigo {
+            background: transparent;
+            color: var(--brand-indigo);
+            font-weight: 600;
+            border: 1px solid var(--brand-indigo);
+            border-radius: 8px;
+            padding: 0.75rem 1.75rem;
+            transition: all 0.2s ease;
+        }
+
+        .btn-outline-indigo:hover {
+            background: var(--brand-indigo-light);
+            color: var(--brand-indigo);
+            transform: translateY(-1px);
+        }
+
+        .promo-pill {
+            background: var(--brand-indigo-light);
+            color: var(--brand-indigo);
+            padding: 0.5rem 1.2rem;
+            border-radius: 9999px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+    </style>
 </head>
 <body>
 
-    <!-- Global Navigation Bar -->
-    <nav class="navbar navbar-expand-lg sticky-top navbar-custom">
+    <!-- Header Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-custom py-3">
         <div class="container">
-            <a class="navbar-brand fw-bold text-indigo" href="{% url 'index' %}">AlumniSphere</a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <a class="navbar-brand d-flex align-items-center gap-2" href="{% url 'index' %}">
+                <span style="width: 12px; height: 12px; background: var(--brand-indigo); border-radius: 50%; display: inline-block;"></span>
+                AlumniSphere
+            </a>
+            <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto align-items-center">
-                    <li class="nav-item"><a class="nav-link px-3" href="{% url 'directory' %}">Explore Directory</a></li>
-                    <li class="nav-item"><a class="nav-link px-3" href="#features">Features</a></li>
-                    <li class="nav-item"><a class="nav-link px-3" href="#stats">Impact</a></li>
-                    {% if user.is_authenticated %}
-                        <li class="nav-item"><a class="nav-link px-3 text-dark fw-medium" href="{% url 'profile' username=user.username %}">Hi, {{ user.username }}</a></li>
-                        <li class="nav-item"><a class="btn btn-outline-indigo ms-2" href="{% url 'logout' %}">Logout</a></li>
+                <ul class="navbar-nav ms-auto align-items-lg-center gap-2">
+                    {% if request.user.is_authenticated %}
+                        <li class="nav-item"><a class="nav-link px-3" href="{% url 'feed' %}">Network Feed</a></li>
+                        <li class="nav-item"><a class="nav-link px-3" href="{% url 'directory' %}">Explore Directory</a></li>
+                        
+                        <!-- Integrated Messaging Hub -->
+                        <li class="nav-item">
+                            <a href="{% url 'chat_dashboard' %}" class="nav-link d-flex align-items-center gap-1">
+    <span>Messages</span>
+    {% if global_unread_count > 0 %}
+        <span class="badge rounded-pill bg-danger animate-pulse" style="font-size: 0.7rem; padding: 0.25em 0.6em;">
+            {{ global_unread_count }}
+        </span>
+    {% endif %}
+</a>
+                        </li>
+
+                        <li class="nav-item">
+                            <a class="nav-link px-3 fw-semibold text-dark" href="{% url 'profile' username=request.user.username %}">
+                                Workspace (@{{ request.user.username }})
+                            </a>
+                        </li>
+                        <li class="nav-item ms-lg-2">
+                            <a class="btn btn-outline-danger btn-sm px-3" href="{% url 'logout' %}" style="border-radius: 6px;">Sign Out</a>
+                        </li>
                     {% else %}
-                        <li class="nav-item"><a class="btn btn-outline-indigo me-2 ms-2" href="{% url 'login' %}">Login</a></li>
-                        <li class="nav-item"><a class="btn btn-indigo text-white" href="{% url 'register' %}">Join Network</a></li>
+                        <li class="nav-item"><a class="nav-link px-3" href="{% url 'login' %}">Sign In</a></li>
+                        <li class="nav-item ms-lg-2">
+                            <a class="btn btn-indigo btn-sm px-4" href="{% url 'register' %}">Get Started</a>
+                        </li>
                     {% endif %}
                 </ul>
             </div>
         </div>
     </nav>
 
-    <!-- Content Injection Entry Point -->
+    <!-- Main Content Injection -->
     <main>
         {% block content %}
         {% endblock %}
     </main>
 
-    <!-- Global Footer -->
-    <footer class="py-4 mt-5 border-top bg-light">
-        <div class="container text-center text-muted small">
-            &copy; {% now "Y" %} AlumniSphere. Built for professional network scaling.
-        </div>
-    </footer>
-
-    <!-- Bootstrap Bundle JS -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Bootstrap 5 JavaScript Bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- AOS Scroll Animations Script -->
+    <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            AOS.init({
+                duration: 800,
+                easing: 'cubic-bezier(0.16, 1, 0.3, 1)',
+                once: true,
+                offset: 40
+            });
+        });
+    </script>
 </body>
 </html>

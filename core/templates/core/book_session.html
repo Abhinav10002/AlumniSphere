@@ -1,0 +1,52 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Schedule Mentorship | AlumniSphere{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-6">
+            <div class="premium-card">
+                <div class="mb-4">
+                    <span class="badge bg-primary-subtle text-indigo px-3 py-2 rounded-pill mb-2 font-monospace text-uppercase" style="font-size: 0.75rem; background-color: var(--brand-indigo-light); color: var(--brand-indigo);">
+                        1-on-1 Mentorship
+                    </span>
+                    <h2 class="fw-bold tracking-tight text-dark mb-1">Request a Session</h2>
+                    <p class="text-muted small">Scheduling a strategic milestones alignment session with **@{{ mentor.username }}**.</p>
+                </div>
+
+                <form method="POST">
+                    {% csrf_token %}
+                    
+                    <!-- Session Topic -->
+                    <div class="mb-4">
+                        <label for="topic" class="form-label fw-semibold small text-dark">Focus Topic / Agenda</label>
+                        <input type="text" 
+                               name="topic" 
+                               id="topic" 
+                               class="form-control-custom" 
+                               placeholder="e.g., Mock Technical Interview, Resume Review, System Design guidance" 
+                               required>
+                    </div>
+
+                    <!-- Target Calendar Date/Time Selection -->
+                    <div class="mb-4">
+                        <label for="scheduled_for" class="form-label fw-semibold small text-dark">Target Date & Time</label>
+                        <input type="datetime-local" 
+                               name="scheduled_for" 
+                               id="scheduled_for" 
+                               class="form-control-custom" 
+                               required>
+                    </div>
+
+                    <!-- Action Interface Triggers -->
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-indigo py-2">Submit Booking Request</button>
+                        <a href="{% url 'profile' username=mentor.username %}" class="btn btn-outline-indigo py-2">Cancel</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

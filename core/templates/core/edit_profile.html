@@ -10,9 +10,22 @@
                 <h3 class="fw-bold text-dark mb-1">Profile Configuration Workspace</h3>
                 <p class="text-muted small mb-4">Update your structural parameters to improve match visibility across the platform directory.</p>
 
-                <form method="POST" novalidate>
+                <!-- enctype added for handling image upload files -->
+                <form method="POST" enctype="multipart/form-data" novalidate>
                     {% csrf_token %}
                     
+                    <!-- Avatar File Field -->
+                    <div class="mb-4 pb-3 border-bottom">
+                        <label class="form-label fw-bold">Profile Picture</label>
+                        <div class="d-flex align-items-center gap-3">
+                            {% if request.user.profile.avatar %}
+                                <img src="{{ request.user.profile.avatar.url }}" alt="Avatar" class="rounded-circle border" style="width: 60px; height: 60px; object-fit: cover;">
+                            {% endif %}
+                            <input type="file" name="avatar" class="form-control-custom">
+                        </div>
+                    </div>
+
+                    <!-- Personal Names -->
                     <div class="row g-3 mb-3">
                         <div class="col-md-6">
                             <label class="form-label">First Name</label>
@@ -24,7 +37,12 @@
                         </div>
                     </div>
 
+                    <!-- Email & Role -->
                     <div class="row g-3 mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Email Address</label>
+                            <input type="email" name="email" class="form-control-custom" value="{{ request.user.email }}">
+                        </div>
                         <div class="col-md-6">
                             <label class="form-label">Network Role Orientation</label>
                             <select name="role" class="form-control-custom">
@@ -32,28 +50,35 @@
                                 <option value="alumni" {% if request.user.profile.role == 'alumni' %}selected{% endif %}>Alumni</option>
                             </select>
                         </div>
+                    </div>
+
+                    <!-- Job Title, Company, Location & Graduation Year -->
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Functional Job Title</label>
+                            <input type="text" name="job_title" class="form-control-custom" value="{{ request.user.profile.job_title }}" placeholder="Systems Engineer">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Current Company Enterprise</label>
+                            <input type="text" name="company" class="form-control-custom" value="{{ request.user.profile.company }}" placeholder="Stripe">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Location</label>
+                            <input type="text" name="location" class="form-control-custom" value="{{ request.user.profile.location }}" placeholder="San Francisco, CA">
+                        </div>
                         <div class="col-md-6">
                             <label class="form-label">Graduation Year</label>
                             <input type="number" name="graduation_year" class="form-control-custom" value="{{ request.user.profile.graduation_year|default:'' }}" placeholder="2026">
                         </div>
                     </div>
 
-                    <div class="row g-3 mb-3">
-                        <div class="col-md-6">
-                            <label class="form-label">Current Company Enterprise</label>
-                            <input type="text" name="company" class="form-control-custom" value="{{ request.user.profile.company }}" placeholder="Stripe">
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label">Functional Job Title</label>
-                            <input type="text" name="job_title" class="form-control-custom" value="{{ request.user.profile.job_title }}" placeholder="Systems Engineer">
-                        </div>
-                    </div>
-
+                    <!-- Biography -->
                     <div class="mb-3">
                         <label class="form-label">Biography Overview</label>
                         <textarea name="bio" rows="4" class="form-control-custom" placeholder="Share your focus elements, stack specializations, or core industrial goals...">{{ request.user.profile.bio }}</textarea>
                     </div>
 
+                    <!-- Social Media Repository Connections -->
                     <div class="row g-3 mb-4">
                         <div class="col-md-6">
                             <label class="form-label">LinkedIn Repository Connection</label>
@@ -65,6 +90,7 @@
                         </div>
                     </div>
 
+                    <!-- Action Controls -->
                     <div class="d-flex gap-2 justify-content-end">
                         <a href="{% url 'profile' username=request.user.username %}" class="btn btn-outline-indigo">Cancel</a>
                         <button type="submit" class="btn btn-indigo text-white px-4">Save Changes</button>

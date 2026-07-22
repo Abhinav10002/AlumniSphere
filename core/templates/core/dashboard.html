@@ -1,0 +1,98 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Workspace Dashboard | AlumniSphere{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row mb-5">
+        <div class="col-10">
+            <h1 class="fw-extrabold tracking-tight text-dark mb-1" style="font-weight: 800;">Mentorship Operations Workspace</h1>
+            <p class="text-muted">Manage your ongoing career strategy logs, active mentorship pipelines, and scheduling maps.</p>
+        </div>
+    </div>
+
+    <!-- Layout Grid: Left Split for Incoming Requests (As Mentor), Right Split for Outgoing (As Student) -->
+    <div class="row g-4">
+        
+        <!-- Pipeline 1: Incoming Sessions (Acting as a Mentor User) -->
+        <div class="col-lg-6">
+            <h4 class="fw-bold text-dark mb-4 d-flex align-items-center gap-2">
+                Incoming Mentorship Pipelines
+            </h4>
+            
+            {% if sessions_as_mentor %}
+                <div class="d-flex flex-column gap-3">
+                    {% for session in sessions_as_mentor %}
+                        <div class="premium-card p-4">
+                            <div class="d-flex justify-content-between align-items-start mb-3">
+                                <div>
+                                    <h5 class="fw-bold mb-1 text-dark">{{ session.topic }}</h5>
+                                    <p class="text-muted small mb-0">Student: **@{{ session.student.username }}**</p>
+                                </div>
+                                <span class="badge text-capitalize px-3 py-2 rounded-pill 
+                                    {% if session.status == 'pending' %}bg-warning-subtle text-warning-emphasis
+                                    {% elif session.status == 'approved' %}bg-success-subtle text-success-emphasis
+                                    {% elif session.status == 'completed' %}bg-primary-subtle text-primary-emphasis
+                                    {% else %}bg-danger-subtle text-danger-emphasis{% endif %}">
+                                    {{ session.status }}
+                                </span>
+                            </div>
+                            <p class="small text-dark mb-3">📆 Scheduled for: **{{ session.scheduled_for|date:"M d, Y @ h:i A" }}**</p>
+                            
+                            <!-- Action Matrix Elements -->
+                            {% if session.status == 'pending' %}
+                                <div class="d-flex gap-2">
+                                    <a href="{% url 'update_session_status' session_id=session.id action='approve' %}" class="btn btn-indigo btn-sm px-3 py-2">Approve Session</a>
+                                    <a href="{% url 'update_session_status' session_id=session.id action='cancel' %}" class="btn btn-outline-danger btn-sm px-3 py-2" style="border-radius: 6px;">Decline</a>
+                                </div>
+                            {% elif session.status == 'approved' %}
+                                <div class="d-flex gap-2">
+                                    <a href="{% url 'update_session_status' session_id=session.id action='complete' %}" class="btn btn-success btn-sm px-3 py-2 text-white" style="border-radius: 6px;">Mark Completed</a>
+                                    <a href="{% url 'update_session_status' session_id=session.id action='cancel' %}" class="btn btn-outline-danger btn-sm px-3 py-2" style="border-radius: 6px;">Cancel</a>
+                                </div>
+                            {% endif %}
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="premium-card text-center py-5">
+                    <p class="text-muted mb-0">No active incoming session tracking requests detected.</p>
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- Pipeline 2: Outgoing Sessions (Acting as a Student User) -->
+        <div class="col-lg-6">
+            <h4 class="fw-bold text-dark mb-4">Your Booked Sessions</h4>
+            
+            {% if sessions_as_student %}
+                <div class="d-flex flex-column gap-3">
+                    {% for session in sessions_as_student %}
+                        <div class="premium-card p-4">
+                            <div class="d-flex justify-content-between align-items-start mb-3">
+                                <div>
+                                    <h5 class="fw-bold mb-1 text-dark">{{ session.topic }}</h5>
+                                    <p class="text-muted small mb-0">Mentor Alumnus: **@{{ session.mentor.username }}**</p>
+                                </div>
+                                <span class="badge text-capitalize px-3 py-2 rounded-pill 
+                                    {% if session.status == 'pending' %}bg-warning-subtle text-warning-emphasis
+                                    {% elif session.status == 'approved' %}bg-success-subtle text-success-emphasis
+                                    {% elif session.status == 'completed' %}bg-primary-subtle text-primary-emphasis
+                                    {% else %}bg-danger-subtle text-danger-emphasis{% endif %}">
+                                    {{ session.status }}
+                                </span>
+                            </div>
+                            <p class="small text-dark mb-0">📆 Date: **{{ session.scheduled_for|date:"M d, Y @ h:i A" }}**</p>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="premium-card text-center py-5">
+                    <p class="text-muted mb-0">You haven't requested any mentorship milestones yet.</p>
+                    <a href="{% url 'directory' %}" class="btn btn-outline-indigo btn-sm mt-3">Browse Alumni Matrix</a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

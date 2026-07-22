@@ -1,0 +1,58 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Network Feed | AlumniSphere{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            
+            <!-- Minimal Post Creation Workspace Box -->
+            <div class="premium-card mb-4 py-4 px-4">
+                <h6 class="fw-bold text-dark mb-3">Share an update with the sphere</h6>
+                <form method="POST" action="{% url 'create_post' %}">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <textarea name="content" rows="3" class="form-control-custom" placeholder="What's happening in your engineering circle, project milestone, or industry career?" required></textarea>
+                    </div>
+                    <div class="text-end">
+                        <button type="submit" class="btn btn-indigo text-white px-4 py-2" style="font-size: 0.9rem;">Publish Update</button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Timeline Content Feed Engine loop -->
+            <div class="d-flex flex-column gap-4">
+                {% for post in posts %}
+                    <div class="premium-card py-4 px-4">
+                        <div class="d-flex align-items-start justify-content-between mb-3">
+                            <div class="d-flex align-items-center gap-2">
+                                <div>
+                                    <a href="{% url 'profile' username=post.author.username %}" class="fw-bold text-dark text-decoration-none d-block mb-0.5" style="font-size: 1.05rem;">
+                                        {{ post.author.first_name|default:post.author.username }}
+                                    </a>
+                                    <span class="text-muted small">@{{ post.author.username }}</span>
+                                </div>
+                                {% if post.author.profile.role == 'alumni' %}
+                                    <span class="badge bg-success-subtle text-success border border-success-subtle font-monospace px-2 py-0.5 text-uppercase" style="font-size: 0.65rem;">Alumni</span>
+                                {% else %}
+                                    <span class="badge bg-primary-subtle text-indigo border border-primary-subtle font-monospace px-2 py-0.5 text-uppercase" style="font-size: 0.65rem; background-color: #e0e7ff;">Student</span>
+                                {% endif %}
+                            </div>
+                            <span class="text-muted small font-monospace">{{ post.created_at|timesince }} ago</span>
+                        </div>
+                        
+                        <!-- Content Paragraph Block -->
+                        <p class="text-secondary lh-base mb-0" style="white-space: pre-wrap; font-size: 0.95rem;">{{ post.content }}</p>
+                    </div>
+                {% empty %}
+                    <div class="text-center py-5">
+                        <p class="text-muted">The networking feed pipeline is completely silent. Be the first to publish an update!</p>
+                    </div>
+                {% endfor %}
+            </div>
+
+        </div>
+    </div>
+</div>
+{% endblock %}
