@@ -5,54 +5,147 @@
 {% block content %}
 <div class="container py-5">
     <div class="row justify-content-center">
-        <div class="col-md-8">
+        <div class="col-lg-8">
             
-            <!-- Minimal Post Creation Workspace Box -->
-            <div class="premium-card mb-4 py-4 px-4">
-                <h6 class="fw-bold text-dark mb-3">Share an update with the sphere</h6>
-                <form method="POST" action="{% url 'create_post' %}">
+            <!-- Create Post Card -->
+            <div class="premium-card bg-white border rounded-4 p-4 mb-4 shadow-sm">
+                <h5 class="fw-bold text-dark mb-3">Share an update with the sphere</h5>
+                
+                <form method="POST" action="{% url 'create_post' %}" enctype="multipart/form-data">
                     {% csrf_token %}
+                    
                     <div class="mb-3">
-                        <textarea name="content" rows="3" class="form-control-custom" placeholder="What's happening in your engineering circle, project milestone, or industry career?" required></textarea>
+                        <textarea id="postContent" 
+                                  name="content" 
+                                  class="form-control border-0 bg-light rounded-3 p-3" 
+                                  rows="3" 
+                                  placeholder="What's happening in your engineering circle, project milestone, or industry career?"></textarea>
                     </div>
-                    <div class="text-end">
-                        <button type="submit" class="btn btn-indigo text-white px-4 py-2" style="font-size: 0.9rem;">Publish Update</button>
+
+                    <!-- File Upload Previews Container -->
+                    <div id="filePreview" class="d-flex flex-wrap gap-2 mb-3"></div>
+
+                    <div class="d-flex align-items-center justify-content-between pt-2 border-top">
+                        <!-- Action Toolbar -->
+                        <div class="d-flex align-items-center gap-2">
+                            <!-- Photo Attachment Button -->
+                            <label for="imageUpload" class="btn btn-sm btn-light border text-secondary fw-medium d-inline-flex align-items-center gap-1 cursor-pointer">
+                                <i class="bi bi-image text-primary"></i> Photo
+                            </label>
+                            <input type="file" id="imageUpload" name="image" accept="image/*" class="d-none" onchange="previewFile(this, 'Photo')">
+
+                            <!-- Document Attachment Button -->
+                            <label for="fileUpload" class="btn btn-sm btn-light border text-secondary fw-medium d-inline-flex align-items-center gap-1 cursor-pointer">
+                                <i class="bi bi-paperclip text-success"></i> File
+                            </label>
+                            <input type="file" id="fileUpload" name="file_attachment" class="d-none" onchange="previewFile(this, 'File')">
+
+                            <!-- Quick Emoji Selector Dropdown -->
+                            <div class="dropdown">
+                                <button type="button" class="btn btn-sm btn-light border text-secondary fw-medium d-inline-flex align-items-center gap-1 dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <i class="bi bi-emoji-smile text-warning"></i> Emoji
+                                </button>
+                                <div class="dropdown-menu p-2 shadow-sm border-0" style="min-width: 180px;">
+                                    <div class="d-flex flex-wrap gap-2 fs-5">
+                                        <span class="emoji-btn cursor-pointer" onclick="insertEmoji('👍')">👍</span>
+                                        <span class="emoji-btn cursor-pointer" onclick="insertEmoji('🚀')">🚀</span>
+                                        <span class="emoji-btn cursor-pointer" onclick="insertEmoji('💡')">💡</span>
+                                        <span class="emoji-btn cursor-pointer" onclick="insertEmoji('🎉')">🎉</span>
+                                        <span class="emoji-btn cursor-pointer" onclick="insertEmoji('👏')">👏</span>
+                                        <span class="emoji-btn cursor-pointer" onclick="insertEmoji('🔥')">🔥</span>
+                                        <span class="emoji-btn cursor-pointer" onclick="insertEmoji('💻')">💻</span>
+                                        <span class="emoji-btn cursor-pointer" onclick="insertEmoji('🎓')">🎓</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Publish Button -->
+                        <button type="submit" class="btn btn-indigo px-4 py-2 fw-semibold">Publish Update</button>
                     </div>
                 </form>
             </div>
 
-            <!-- Timeline Content Feed Engine loop -->
-            <div class="d-flex flex-column gap-4">
+            <!-- Feed Timeline Stream -->
+            {% if posts %}
                 {% for post in posts %}
-                    <div class="premium-card py-4 px-4">
-                        <div class="d-flex align-items-start justify-content-between mb-3">
-                            <div class="d-flex align-items-center gap-2">
-                                <div>
-                                    <a href="{% url 'profile' username=post.author.username %}" class="fw-bold text-dark text-decoration-none d-block mb-0.5" style="font-size: 1.05rem;">
-                                        {{ post.author.first_name|default:post.author.username }}
-                                    </a>
-                                    <span class="text-muted small">@{{ post.author.username }}</span>
-                                </div>
-                                {% if post.author.profile.role == 'alumni' %}
-                                    <span class="badge bg-success-subtle text-success border border-success-subtle font-monospace px-2 py-0.5 text-uppercase" style="font-size: 0.65rem;">Alumni</span>
-                                {% else %}
-                                    <span class="badge bg-primary-subtle text-indigo border border-primary-subtle font-monospace px-2 py-0.5 text-uppercase" style="font-size: 0.65rem; background-color: #e0e7ff;">Student</span>
-                                {% endif %}
-                            </div>
-                            <span class="text-muted small font-monospace">{{ post.created_at|timesince }} ago</span>
-                        </div>
+                    <div class="premium-card bg-white border rounded-4 p-4 mb-4 shadow-sm">
                         
-                        <!-- Content Paragraph Block -->
-                        <p class="text-secondary lh-base mb-0" style="white-space: pre-wrap; font-size: 0.95rem;">{{ post.content }}</p>
-                    </div>
-                {% empty %}
-                    <div class="text-center py-5">
-                        <p class="text-muted">The networking feed pipeline is completely silent. Be the first to publish an update!</p>
+                        <!-- Author Metadata -->
+                        <div class="d-flex align-items-center justify-content-between mb-3">
+                            <div class="d-flex align-items-center gap-3">
+                                {% if post.author.profile.avatar and post.author.profile.avatar.url != '/media/avatars/default.png' %}
+                                    <img src="{{ post.author.profile.avatar.url }}" alt="Avatar" class="rounded-circle border" style="width: 44px; height: 44px; object-fit: cover;">
+                                {% else %}
+                                    <div class="rounded-circle bg-light border d-flex align-items-center justify-content-center fw-bold" style="width: 44px; height: 44px; font-size: 1.1rem; color: var(--brand-indigo);">
+                                        {{ post.author.username|slice:":1"|upper }}
+                                    </div>
+                                {% endif %}
+                                <div>
+                                    <a href="{% url 'profile' username=post.author.username %}" class="fw-bold text-dark text-decoration-none d-block">
+                                        {% if post.author.first_name %}{{ post.author.first_name }} {{ post.author.last_name }}{% else %}{{ post.author.username }}{% endif %}
+                                    </a>
+                                    <span class="text-muted small">@{{ post.author.username }} • {{ post.created_at|timesince }} ago</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Post Text Content (Auto-linkifies URLs) -->
+                        {% if post.content %}
+                            <div class="text-dark mb-3" style="line-height: 1.6; white-space: pre-line;">
+                                {{ post.content|urlize }}
+                            </div>
+                        {% endif %}
+
+                        <!-- Attached Image -->
+                        {% if post.image %}
+                            <div class="mb-3 rounded-3 overflow-hidden border">
+                                <img src="{{ post.image.url }}" alt="Post media" class="img-fluid w-100" style="max-height: 480px; object-fit: cover;">
+                            </div>
+                        {% endif %}
+
+                        <!-- Attached Document File -->
+                        {% if post.file_attachment %}
+                            <div class="p-3 bg-light border rounded-3 d-flex align-items-center justify-content-between mb-3">
+                                <div class="d-flex align-items-center gap-2 text-truncate me-2">
+                                    <i class="bi bi-file-earmark-arrow-down-fill fs-4" style="color: var(--brand-indigo);"></i>
+                                    <span class="small fw-semibold text-dark text-truncate">{{ post.file_attachment.name|slice:"17:" }}</span>
+                                </div>
+                                <a href="{{ post.file_attachment.url }}" download class="btn btn-sm btn-outline-secondary fw-semibold flex-shrink-0">
+                                    <i class="bi bi-download"></i> Download File
+                                </a>
+                            </div>
+                        {% endif %}
+
                     </div>
                 {% endfor %}
-            </div>
+            {% else %}
+                <div class="text-center py-5 text-muted">
+                    <i class="bi bi-chat-left-dots display-4 d-block mb-3 opacity-50"></i>
+                    <p class="mb-0">The networking feed pipeline is completely silent. Be the first to publish an update!</p>
+                </div>
+            {% endif %}
 
         </div>
     </div>
 </div>
+
+<script>
+    function insertEmoji(emoji) {
+        const textarea = document.getElementById('postContent');
+        textarea.value += emoji;
+        textarea.focus();
+    }
+
+    function previewFile(input, labelType) {
+        const previewContainer = document.getElementById('filePreview');
+        if (input.files && input.files[0]) {
+            const fileName = input.files[0].name;
+            const badge = document.createElement('span');
+            badge.className = 'badge bg-light border text-dark p-2 d-inline-flex align-items-center gap-2';
+            badge.innerHTML = `<i class="bi bi-check-circle-fill text-success"></i> ${labelType}: ${fileName}`;
+            previewContainer.appendChild(badge);
+        }
+    }
+</script>
 {% endblock %}

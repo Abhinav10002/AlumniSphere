@@ -3,43 +3,116 @@
 {% block title %}Join the Network | AlumniSphere{% endblock %}
 
 {% block content %}
-<div class="container">
-    <div class="auth-container" style="max-width: 480px;">
-        <div class="auth-card">
-            <h3 class="fw-bold text-dark text-center mb-1">Create an account</h3>
-            <p class="text-muted text-center small mb-4">Join your institution's elite alumni network</p>
+<div class="container py-5">
+    <div class="row align-items-center justify-content-center g-5 my-2">
+        
+        <!-- Left Column: Branding Showcase -->
+        <div class="col-lg-6 d-none d-lg-block" data-aos="fade-right">
+            <div class="pe-xl-4">
+                <span class="promo-pill mb-3">
+                    <i class="bi bi-stars"></i> Institution Alumni Portal
+                </span>
+                <h1 class="display-5 fw-bold text-dark mb-3 tracking-tight">
+                    Connect with your institution's global footprint.
+                </h1>
+                <p class="text-secondary lead mb-4" style="font-size: 1.1rem; line-height: 1.6;">
+                    Join thousands of students and alumni bridging mentorship, career opportunities, and direct peer networking on AlumniSphere.
+                </p>
 
-            {% if error %}
-            <div class="alert alert-danger py-2 px-3 small rounded-3 mb-3" role="alert">
-                {{ error }}
+                <!-- Value Highlights -->
+                <div class="d-flex flex-column gap-3 mb-4">
+                    <div class="d-flex align-items-start gap-3">
+                        <div class="rounded-circle bg-white border p-2 text-primary shadow-sm flex-shrink-0 d-flex align-items-center justify-content-center" style="width: 42px; height: 42px;">
+                            <i class="bi bi-people-fill fs-5" style="color: var(--brand-indigo);"></i>
+                        </div>
+                        <div>
+                            <h6 class="fw-bold mb-0 text-dark">Direct Alumni Directory</h6>
+                            <span class="text-muted small">Search and filter peers by role, enterprise, or graduation class.</span>
+                        </div>
+                    </div>
+
+                    <div class="d-flex align-items-start gap-3">
+                        <div class="rounded-circle bg-white border p-2 text-primary shadow-sm flex-shrink-0 d-flex align-items-center justify-content-center" style="width: 42px; height: 42px;">
+                            <i class="bi bi-chat-quote-fill fs-5" style="color: var(--brand-indigo);"></i>
+                        </div>
+                        <div>
+                            <h6 class="fw-bold mb-0 text-dark">Integrated Messaging Hub</h6>
+                            <span class="text-muted small">Start direct 1:1 workspace conversations with alumni and mentors.</span>
+                        </div>
+                    </div>
+
+                    <div class="d-flex align-items-start gap-3">
+                        <div class="rounded-circle bg-white border p-2 text-primary shadow-sm flex-shrink-0 d-flex align-items-center justify-content-center" style="width: 42px; height: 42px;">
+                            <i class="bi bi-calendar-check-fill fs-5" style="color: var(--brand-indigo);"></i>
+                        </div>
+                        <div>
+                            <h6 class="fw-bold mb-0 text-dark">1:1 Mentorship Booking</h6>
+                            <span class="text-muted small">Schedule focused sessions with experienced engineers and founders.</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Stats Footer -->
+                <div class="p-3 bg-white border rounded-3 d-flex align-items-center justify-content-between shadow-sm">
+                    <div>
+                        <div class="fw-bold text-dark fs-5">100% Verified</div>
+                        <span class="text-muted text-xs">Institutional Network</span>
+                    </div>
+                    <div class="vr"></div>
+                    <div>
+                        <div class="fw-bold text-dark fs-5">Real-time</div>
+                        <span class="text-muted text-xs">Peer Interactions</span>
+                    </div>
+                    <div class="vr"></div>
+                    <div>
+                        <div class="fw-bold text-dark fs-5">Free Access</div>
+                        <span class="text-muted text-xs">For All Students</span>
+                    </div>
+                </div>
             </div>
-            {% endif %}
-
-            <form method="POST" novalidate>
-                {% csrf_token %}
-                <div class="mb-3">
-                    <label for="username" class="form-label">Username</label>
-                    <input type="text" name="username" id="username" class="form-control-custom" placeholder="chosen_username" required>
-                </div>
-                <div class="mb-3">
-                    <label for="email" class="form-label">Email Address</label>
-                    <input type="email" name="email" id="email" class="form-control-custom" placeholder="you@example.com" required>
-                </div>
-                <div class="mb-3">
-                    <label for="password" class="form-label">Password</label>
-                    <input type="password" name="password" id="password" class="form-control-custom" placeholder="••••••••" required>
-                </div>
-                <div class="mb-4">
-                    <label for="password_confirm" class="form-label">Confirm Password</label>
-                    <input type="password" name="password_confirm" id="password_confirm" class="form-control-custom" placeholder="••••••••" required>
-                </div>
-                <button type="submit" class="btn btn-indigo text-white w-100 py-2 mb-3">Register</button>
-            </form>
-
-            <p class="text-center text-muted small mb-0">
-                Already have an account? <a href="{% url 'login' %}" class="text-indigo text-decoration-none fw-medium">Sign in</a>
-            </p>
         </div>
+
+        <!-- Right Column: Registration Card -->
+        <div class="col-md-8 col-lg-6" data-aos="fade-left">
+            <div class="premium-card">
+                <div class="mb-4">
+                    <h3 class="fw-bold text-dark mb-1">Create an account</h3>
+                    <p class="text-muted small mb-0">Join your institution's elite alumni network</p>
+                </div>
+
+                <form method="POST" action="{% url 'register' %}" novalidate>
+                    {% csrf_token %}
+                    
+                    <div class="mb-3">
+                        <label class="form-label fw-medium">Username</label>
+                        <input type="text" name="username" class="form-control" placeholder="chosen_username" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-medium">Email Address</label>
+                        <input type="email" name="email" class="form-control" placeholder="you@example.com" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-medium">Password</label>
+                        <input type="password" name="password" class="form-control" placeholder="••••••••" required>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label fw-medium">Confirm Password</label>
+                        <input type="password" name="confirm_password" class="form-control" placeholder="••••••••" required>
+                    </div>
+
+                    <button type="submit" class="btn btn-indigo w-100 py-2.5 fw-semibold mb-3">Register</button>
+
+                    <div class="text-center pt-2 border-top">
+                        <span class="text-muted small">Already have an account?</span>
+                        <a href="{% url 'login' %}" class="small text-decoration-none fw-semibold ms-1" style="color: var(--brand-indigo);">Sign in</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+
     </div>
 </div>
 {% endblock %}
