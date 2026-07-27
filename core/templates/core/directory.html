@@ -4,63 +4,94 @@
 
 {% block content %}
 <div class="container py-5">
-    <div class="row mb-5 align-items-center justify-content-between g-3">
-        <div class="col-md-6">
-            <h2 class="fw-bold text-dark mb-1">Global Network Directory</h2>
+    
+    <!-- Directory Header & Filter Bar -->
+    <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3 mb-4">
+        <div>
+            <h2 class="fw-extrabold mb-1" style="font-weight: 800;">Global Network Directory</h2>
             <p class="text-muted mb-0">Discover and bridge connections across your institution's legacy footprint.</p>
         </div>
-        <!-- Role Quick-Filter Bar -->
-        <div class="col-md-4 text-md-end">
-            <form method="GET" action="{% url 'directory' %}" class="d-flex gap-2">
-                <select name="role_filter" class="form-control-custom font-medium" onchange="this.form.submit()">
-                    <option value="" {% if not active_filter %}selected{% endif %}>All Network Members</option>
-                    <option value="alumni" {% if active_filter == 'alumni' %}selected{% endif %}>Alumni Professionals</option>
-                    <option value="student" {% if active_filter == 'student' %}selected{% endif %}>Active Students</option>
-                </select>
-            </form>
-        </div>
+
+        <!-- Filter Form -->
+        <form method="GET" action="{% url 'directory' %}" class="d-flex align-items-center gap-2">
+            {% if request.GET.q %}
+                <input type="hidden" name="q" value="{{ request.GET.q }}">
+            {% endif %}
+            <select name="role" class="form-select border shadow-sm" onchange="this.form.submit()" style="min-width: 200px;">
+                <option value="" {% if not request.GET.role %}selected{% endif %}>All Network Members</option>
+                <option value="student" {% if request.GET.role == 'student' %}selected{% endif %}>Students Only</option>
+                <option value="alumni" {% if request.GET.role == 'alumni' %}selected{% endif %}>Alumni Only</option>
+            </select>
+        </form>
     </div>
 
-    <!-- Cards Layout Grid -->
+    <!-- Member Directory Grid -->
     <div class="row g-4">
-        {% for member in members %}
-            <div class="col-md-4 col-sm-6">
-                <div class="premium-card h-100 d-flex flex-column justify-content-between py-4 px-4">
-                    <div>
-                        <div class="d-flex align-items-start justify-content-between mb-3">
-                            <div>
-                                <h5 class="fw-bold text-dark mb-0.5">{{ member.first_name|default:member.username }}</h5>
-                                <span class="text-muted small">@{{ member.username }}</span>
+        {% if profiles %}
+            {% for profile in profiles %}
+                <div class="col-lg-4 col-md-6" data-aos="fade-up">
+                    <div class="premium-card h-100 d-flex flex-column justify-content-between shadow-sm">
+                        <div>
+                            <!-- User Header Details -->
+                            <div class="d-flex align-items-start justify-content-between mb-3">
+                                <div class="d-flex align-items-center gap-3">
+                                    {% if profile.avatar and profile.avatar.url != '/media/avatars/default.png' %}
+                                        <img src="{{ profile.avatar.url }}" alt="{{ profile.user.username }}" class="rounded-circle border" style="width: 52px; height: 52px; object-fit: cover;">
+                                    {% else %}
+                                        <div class="rounded-circle border d-flex align-items-center justify-content-center fw-bold" style="width: 52px; height: 52px; font-size: 1.25rem; color: var(--brand-indigo); background: var(--brand-indigo-light);">
+                                            {{ profile.user.username|slice:":1"|upper }}
+                                        </div>
+                                    {% endif %}
+                                    <div>
+                                        <h5 class="fw-bold mb-0">
+                                            {% if profile.user.first_name %}{{ profile.user.first_name }} {{ profile.user.last_name }}{% else %}{{ profile.user.username }}{% endif %}
+                                        </h5>
+                                        <span class="text-muted small">@{{ profile.user.username }}</span>
+                                    </div>
+                                </div>
+
+                                <span class="badge rounded-pill text-uppercase px-2.5 py-1" style="font-size: 0.7rem; letter-spacing: 0.05em; {% if profile.role == 'alumni' %}background: rgba(16, 185, 129, 0.15); color: #10b981;{% else %}background: var(--brand-indigo-light); color: var(--brand-indigo);{% endif %}">
+                                    {{ profile.role }}
+                                </span>
                             </div>
-                            {% if member.profile.role == 'alumni' %}
-                                <span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-0.5 text-uppercase font-monospace" style="font-size: 0.7rem;">Alumni</span>
-                            {% else %}
-                                <span class="badge bg-primary-subtle text-indigo border border-primary-subtle px-2 py-0.5 text-uppercase font-monospace" style="font-size: 0.7rem; background-color: #e0e7ff;">Student</span>
-                            {% endif %}
+
+                            <!-- Career / Academic Info -->
+                            <div class="mb-3">
+                                {% if profile.job_title %}
+                                    <p class="small mb-1 fw-medium">
+                                        {{ profile.job_title }} {% if profile.company %}at <strong style="color: var(--brand-indigo);">{{ profile.company }}</strong>{% endif %}
+                                    </p>
+                                {% endif %}
+                                
+                                {% if profile.bio %}
+                                    <p class="text-muted small line-clamp-2 mb-0" style="line-height: 1.5;">
+                                        {{ profile.bio|truncatewords:16 }}
+                                    </p>
+                                {% else %}
+                                    <p class="text-muted small mb-0 opacity-75">Connecting via AlumniSphere Network parameters.</p>
+                                {% endif %}
+                            </div>
                         </div>
 
-                        <p class="text-muted small lh-base mb-3">
-                            {% if member.profile.job_title %}
-                                {{ member.profile.job_title }} at <strong class="text-dark">{{ member.profile.company }}</strong>
-                            {% else %}
-                                Connecting via AlumniSphere Network parameters.
-                            {% endif %}
-                        </p>
-                    </div>
-
-                    <div class="pt-3 border-top d-flex align-items-center justify-content-between" style="border-color: #f1f5f9 !important;">
-                        <span class="text-muted small fw-medium">
-                            {% if member.profile.graduation_year %}Class of {{ member.profile.graduation_year }}{% endif %}
-                        </span>
-                        <a href="{% url 'profile' username=member.username %}" class="btn btn-outline-indigo btn-sm px-3" style="font-size: 0.8rem; padding: 0.35rem 0.75rem;">View Profile</a>
+                        <!-- Footer Link & Graduation Class -->
+                        <div class="pt-3 border-top d-flex align-items-center justify-content-between mt-2">
+                            <span class="text-muted text-xs">
+                                {% if profile.graduation_year %}Class of {{ profile.graduation_year }}{% else %}Member{% endif %}
+                            </span>
+                            <a href="{% url 'profile' username=profile.user.username %}" class="btn btn-sm btn-outline-indigo px-3">
+                                View Profile
+                            </a>
+                        </div>
                     </div>
                 </div>
+            {% endfor %}
+        {% else %}
+            <div class="col-12 text-center py-5 text-muted">
+                <i class="bi bi-people display-4 d-block mb-3 opacity-50"></i>
+                <p class="mb-0 fs-5">No members found matching your search or filter options.</p>
             </div>
-        {% empty %}
-            <div class="col-12 text-center py-5">
-                <p class="text-muted">No operational profiles found matching the chosen parameters.</p>
-            </div>
-        {% endfor %}
+        {% endif %}
     </div>
+
 </div>
 {% endblock %}

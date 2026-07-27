@@ -8,8 +8,8 @@
         <div class="col-lg-8">
             
             <!-- Create Post Card -->
-            <div class="premium-card bg-white border rounded-4 p-4 mb-4 shadow-sm">
-                <h5 class="fw-bold text-dark mb-3">Share an update with the sphere</h5>
+            <div class="premium-card mb-4 shadow-sm">
+                <h5 class="fw-bold mb-3">Share an update with the sphere</h5>
                 
                 <form method="POST" action="{% url 'create_post' %}" enctype="multipart/form-data">
                     {% csrf_token %}
@@ -17,32 +17,32 @@
                     <div class="mb-3">
                         <textarea id="postContent" 
                                   name="content" 
-                                  class="form-control border-0 bg-light rounded-3 p-3" 
+                                  class="form-control" 
                                   rows="3" 
                                   placeholder="What's happening in your engineering circle, project milestone, or career?"></textarea>
                     </div>
 
-                    <!-- File Upload Previews Container -->
+                    <!-- File Upload Previews -->
                     <div id="filePreview" class="d-flex flex-wrap gap-2 mb-3"></div>
 
-                    <div class="d-flex align-items-center justify-content-between pt-2 border-top">
+                    <div class="d-flex align-items-center justify-content-between pt-3 border-top">
                         <div class="d-flex align-items-center gap-2">
-                            <label for="imageUpload" class="btn btn-sm btn-light border text-secondary fw-medium d-inline-flex align-items-center gap-1 cursor-pointer">
+                            <label for="imageUpload" class="btn btn-sm btn-light fw-medium d-inline-flex align-items-center gap-1 cursor-pointer">
                                 <i class="bi bi-image text-primary"></i> Photo
                             </label>
                             <input type="file" id="imageUpload" name="image" accept="image/*" class="d-none" onchange="previewFile(this, 'Photo')">
 
-                            <label for="fileUpload" class="btn btn-sm btn-light border text-secondary fw-medium d-inline-flex align-items-center gap-1 cursor-pointer">
+                            <label for="fileUpload" class="btn btn-sm btn-light fw-medium d-inline-flex align-items-center gap-1 cursor-pointer">
                                 <i class="bi bi-paperclip text-success"></i> File
                             </label>
                             <input type="file" id="fileUpload" name="file_attachment" class="d-none" onchange="previewFile(this, 'File')">
 
-                            <!-- Emoji Selector Dropdown -->
+                            <!-- Emoji Dropdown -->
                             <div class="dropdown">
-                                <button type="button" class="btn btn-sm btn-light border text-secondary fw-medium d-inline-flex align-items-center gap-1 dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                                <button type="button" class="btn btn-sm btn-light fw-medium d-inline-flex align-items-center gap-1 dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
                                     <i class="bi bi-emoji-smile text-warning"></i> Emoji
                                 </button>
-                                <div class="dropdown-menu p-2 shadow-sm border-0" style="min-width: 180px;">
+                                <div class="dropdown-menu p-2 shadow-sm border" style="min-width: 180px; background: var(--surface-card);">
                                     <div class="d-flex flex-wrap gap-2 fs-5">
                                         <span class="emoji-btn cursor-pointer" onclick="insertEmoji('👍')">👍</span>
                                         <span class="emoji-btn cursor-pointer" onclick="insertEmoji('🚀')">🚀</span>
@@ -62,10 +62,10 @@
                 </form>
             </div>
 
-            <!-- Feed Timeline Stream -->
+            <!-- Feed Stream -->
             {% if posts %}
                 {% for post in posts %}
-                    <div class="premium-card bg-white border rounded-4 p-4 mb-4 shadow-sm">
+                    <div class="premium-card mb-4 shadow-sm">
                         
                         <!-- Author Metadata -->
                         <div class="d-flex align-items-center justify-content-between mb-3">
@@ -73,12 +73,12 @@
                                 {% if post.author.profile.avatar and post.author.profile.avatar.url != '/media/avatars/default.png' %}
                                     <img src="{{ post.author.profile.avatar.url }}" alt="Avatar" class="rounded-circle border" style="width: 44px; height: 44px; object-fit: cover;">
                                 {% else %}
-                                    <div class="rounded-circle bg-light border d-flex align-items-center justify-content-center fw-bold" style="width: 44px; height: 44px; font-size: 1.1rem; color: var(--brand-indigo);">
+                                    <div class="rounded-circle border d-flex align-items-center justify-content-center fw-bold" style="width: 44px; height: 44px; font-size: 1.1rem; color: var(--brand-indigo); background: var(--brand-indigo-light);">
                                         {{ post.author.username|slice:":1"|upper }}
                                     </div>
                                 {% endif %}
                                 <div>
-                                    <a href="{% url 'profile' username=post.author.username %}" class="fw-bold text-dark text-decoration-none d-block">
+                                    <a href="{% url 'profile' username=post.author.username %}" class="fw-bold text-decoration-none d-block">
                                         {% if post.author.first_name %}{{ post.author.first_name }} {{ post.author.last_name }}{% else %}{{ post.author.username }}{% endif %}
                                     </a>
                                     <span class="text-muted small">@{{ post.author.username }} • {{ post.created_at|timesince }} ago</span>
@@ -88,7 +88,7 @@
 
                         <!-- Post Body Content -->
                         {% if post.content %}
-                            <div class="text-dark mb-3" style="line-height: 1.6; white-space: pre-line;">
+                            <div class="mb-3" style="line-height: 1.6; white-space: pre-line;">
                                 {{ post.content|urlize }}
                             </div>
                         {% endif %}
@@ -102,10 +102,10 @@
 
                         <!-- Attached Document File -->
                         {% if post.file_attachment %}
-                            <div class="p-3 bg-light border rounded-3 d-flex align-items-center justify-content-between mb-3">
+                            <div class="p-3 border rounded-3 d-flex align-items-center justify-content-between mb-3" style="background: var(--input-bg);">
                                 <div class="d-flex align-items-center gap-2 text-truncate me-2">
                                     <i class="bi bi-file-earmark-arrow-down-fill fs-4" style="color: var(--brand-indigo);"></i>
-                                    <span class="small fw-semibold text-dark text-truncate">{{ post.file_attachment.name|slice:"17:" }}</span>
+                                    <span class="small fw-semibold text-truncate">{{ post.file_attachment.name|slice:"17:" }}</span>
                                 </div>
                                 <a href="{{ post.file_attachment.url }}" download class="btn btn-sm btn-outline-secondary fw-semibold flex-shrink-0">
                                     <i class="bi bi-download"></i> Download File
@@ -113,52 +113,50 @@
                             </div>
                         {% endif %}
 
-                        <!-- Engagement Action Toolbar (Like, Comment Toggle, Save) -->
+                        <!-- Engagement Action Toolbar -->
                         <div class="d-flex align-items-center justify-content-between pt-3 border-top mt-3">
                             <div class="d-flex align-items-center gap-2">
                                 <!-- Like Button -->
-                                <a href="{% url 'toggle_like_post' post_id=post.id %}" class="btn btn-sm {% if request.user in post.likes.all %}btn-danger{% else %}btn-light border text-secondary{% endif %} fw-semibold d-inline-flex align-items-center gap-1">
+                                <a href="{% url 'toggle_like_post' post_id=post.id %}" class="btn btn-sm {% if request.user in post.likes.all %}btn-danger{% else %}btn-light{% endif %} fw-semibold d-inline-flex align-items-center gap-1">
                                     <i class="bi {% if request.user in post.likes.all %}bi-heart-fill{% else %}bi-heart{% endif %}"></i>
                                     <span>{{ post.total_likes }}</span>
                                 </a>
 
                                 <!-- Comment Toggle Button -->
-                                <button type="button" class="btn btn-sm btn-light border text-secondary fw-semibold d-inline-flex align-items-center gap-1" data-bs-toggle="collapse" data-bs-target="#comments-{{ post.id }}" aria-expanded="false">
+                                <button type="button" class="btn btn-sm btn-light fw-semibold d-inline-flex align-items-center gap-1" data-bs-toggle="collapse" data-bs-target="#comments-{{ post.id }}" aria-expanded="false">
                                     <i class="bi bi-chat-left-dots"></i>
                                     <span>{{ post.total_comments }}</span>
                                 </button>
                             </div>
 
                             <!-- Save / Bookmark Button -->
-                            <a href="{% url 'toggle_save_post' post_id=post.id %}" class="btn btn-sm {% if request.user in post.saved_by.all %}btn-indigo{% else %}btn-light border text-secondary{% endif %} fw-semibold d-inline-flex align-items-center gap-1" title="Save Post">
+                            <a href="{% url 'toggle_save_post' post_id=post.id %}" class="btn btn-sm {% if request.user in post.saved_by.all %}btn-indigo{% else %}btn-light{% endif %} fw-semibold d-inline-flex align-items-center gap-1" title="Save Post">
                                 <i class="bi {% if request.user in post.saved_by.all %}bi-bookmark-fill{% else %}bi-bookmark{% endif %}"></i>
                                 <span>{% if request.user in post.saved_by.all %}Saved{% else %}Save{% endif %}</span>
                             </a>
                         </div>
 
-                        <!-- Collapsible Comments Section -->
-                        <div class="collapse mt-3 pt-3 border-top bg-light rounded-3 p-3" id="comments-{{ post.id }}">
-                            <!-- Existing Comments List -->
+                        <!-- Collapsible Comments Drawer -->
+                        <div class="collapse mt-3 pt-3 border-top rounded-3 p-3" id="comments-{{ post.id }}" style="background: var(--input-bg);">
                             <div class="d-flex flex-column gap-2 mb-3">
                                 {% for comment in post.comments.all %}
-                                    <div class="p-2.5 bg-white border rounded-3 text-sm">
+                                    <div class="p-2.5 border rounded-3 text-sm" style="background: var(--surface-card);">
                                         <div class="d-flex align-items-center justify-content-between mb-1">
-                                            <a href="{% url 'profile' username=comment.author.username %}" class="fw-bold text-dark text-decoration-none small">
+                                            <a href="{% url 'profile' username=comment.author.username %}" class="fw-bold text-decoration-none small">
                                                 @{{ comment.author.username }}
                                             </a>
                                             <span class="text-muted text-xs">{{ comment.created_at|timesince }} ago</span>
                                         </div>
-                                        <p class="mb-0 text-secondary small">{{ comment.content }}</p>
+                                        <p class="mb-0 text-muted small">{{ comment.content }}</p>
                                     </div>
                                 {% empty %}
                                     <p class="text-muted small mb-0 text-center py-2">No comments yet. Be the first to comment!</p>
                                 {% endfor %}
                             </div>
 
-                            <!-- Add Comment Form -->
                             <form method="POST" action="{% url 'add_comment' post_id=post.id %}" class="d-flex gap-2">
                                 {% csrf_token %}
-                                <input type="text" name="content" class="form-control form-control-sm bg-white" placeholder="Write a comment..." required>
+                                <input type="text" name="content" class="form-control form-control-sm" placeholder="Write a comment..." required>
                                 <button type="submit" class="btn btn-sm btn-indigo px-3 flex-shrink-0">Post</button>
                             </form>
                         </div>
@@ -188,7 +186,9 @@
         if (input.files && input.files[0]) {
             const fileName = input.files[0].name;
             const badge = document.createElement('span');
-            badge.className = 'badge bg-light border text-dark p-2 d-inline-flex align-items-center gap-2';
+            badge.className = 'badge border p-2 d-inline-flex align-items-center gap-2';
+            badge.style.background = 'var(--input-bg)';
+            badge.style.color = 'var(--text-main)';
             badge.innerHTML = `<i class="bi bi-check-circle-fill text-success"></i> ${labelType}: ${fileName}`;
             previewContainer.appendChild(badge);
         }

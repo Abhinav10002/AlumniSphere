@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-bs-theme="light">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -19,39 +19,76 @@
     <!-- AOS Animation Stylesheet -->
     <link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
 
-    <!-- Light SaaS Design System -->
     <style>
-        :root {
-            --bg-main: #f8fafc;
-            --surface-card: #ffffff;
-            --brand-indigo: #4f46e5;
-            --brand-indigo-hover: #4338ca;
-            --brand-indigo-light: #eeebff;
-            --text-main: #0f172a;
-            --text-muted: #64748b;
-            --border-color: #e2e8f0;
+        /* Organic Sage Mint & Warm Cream Light Theme */
+        [data-bs-theme="light"] {
+            --bg-main: #F4F6F2;                 /* Soft neutral sage-tinted background */
+            --surface-card: #FAF9F5;            /* Warm cream card canvas */
+            --brand-indigo: #3B826E;            /* Sage mint primary accent */
+            --brand-indigo-hover: #2D6656;      /* Deeper sage for hover states */
+            --brand-indigo-light: #C9E5DC;      /* Light sage badge/highlight background */
+            --brand-rose: #DB9A9A;              /* Dusty rose accent */
+            --text-main: #1F2927;               /* Deep forest-gray for rich text contrast */
+            --text-muted: #6B7C77;              /* Muted slate-green for subheadings */
+            --border-color: #DDE5E0;            /* Soft sage-gray borders */
+            --input-bg: #FFFFFF;                /* Pure white inputs */
+            --nav-bg: rgba(250, 249, 245, 0.92); /* Glassmorphic cream navbar */
+        }
+
+        /* Dark Theme Design Tokens */
+        [data-bs-theme="dark"] {
+            --bg-main: #0b0f19;
+            --surface-card: #151c2c;
+            --brand-indigo: #6366f1;
+            --brand-indigo-hover: #818cf8;
+            --brand-indigo-light: rgba(99, 102, 241, 0.15);
+            --brand-rose: #f43f5e;
+            --text-main: #f1f5f9;
+            --text-muted: #94a3b8;
+            --border-color: #26334d;
+            --input-bg: #0b0f19;
+            --nav-bg: rgba(11, 15, 25, 0.90);
         }
 
         body {
             font-family: 'Inter', sans-serif;
-            background-color: var(--bg-main);
-            color: var(--text-main);
+            background-color: var(--bg-main) !important;
+            color: var(--text-main) !important;
             overflow-x: hidden;
             letter-spacing: -0.02em;
             min-height: 100vh;
             display: flex;
             flex-direction: column;
+            transition: background-color 0.3s ease, color 0.3s ease;
         }
 
-        /* Glassmorphic Sticky Header */
+        /* Enforce Theme Colors Across Overrides */
+        .text-dark, .text-black, h1, h2, h3, h4, h5, h6 {
+            color: var(--text-main) !important;
+        }
+
+        .text-muted, .text-secondary {
+            color: var(--text-muted) !important;
+        }
+
+        .bg-white, .bg-light {
+            background-color: var(--surface-card) !important;
+        }
+
+        .border, .border-top, .border-bottom {
+            border-color: var(--border-color) !important;
+        }
+
+        /* Glassmorphic Navigation Bar */
         .navbar-custom {
-            background: rgba(255, 255, 255, 0.85);
+            background: var(--nav-bg);
             backdrop-filter: blur(16px);
             -webkit-backdrop-filter: blur(16px);
             border-bottom: 1px solid var(--border-color);
             position: sticky;
             top: 0;
             z-index: 1020;
+            transition: background 0.3s ease, border-color 0.3s ease;
         }
 
         .navbar-brand {
@@ -80,52 +117,40 @@
             color: var(--brand-indigo) !important;
         }
 
-        /* Modern Premium Cards */
+        /* Modern Card Surfaces */
         .premium-card, .auth-card {
-            background: var(--surface-card);
-            border: 1px solid var(--border-color);
+            background: var(--surface-card) !important;
+            border: 1px solid var(--border-color) !important;
+            color: var(--text-main) !important;
             border-radius: 16px;
-            padding: 2.5rem 2rem;
-            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05), 0 1px 2px -1px rgba(0, 0, 0, 0.05);
-            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            padding: 2rem;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+            transition: all 0.3s ease;
         }
 
-        /* Universal Form Inputs */
-        input[type="text"],
-        input[type="email"],
-        input[type="password"],
-        input[type="number"],
-        input[type="url"],
-        input[type="file"],
-        select,
-        textarea,
-        .form-control,
-        .form-select {
+        /* Form Controls */
+        input[type="text"], input[type="email"], input[type="password"],
+        input[type="number"], input[type="url"], input[type="file"],
+        select, textarea, .form-control, .form-select {
             width: 100%;
-            background-color: #ffffff;
-            border: 1px solid var(--border-color);
+            background-color: var(--input-bg) !important;
+            border: 1px solid var(--border-color) !important;
             border-radius: 10px;
             padding: 0.7rem 1rem;
             font-size: 0.95rem;
-            color: var(--text-main);
+            color: var(--text-main) !important;
             transition: all 0.2s ease;
-            outline: none;
         }
 
-        input:focus,
-        select:focus,
-        textarea:focus,
-        .form-control:focus,
-        .form-select:focus {
-            border-color: var(--brand-indigo);
-            box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.12);
-            background-color: #ffffff;
+        input:focus, select:focus, textarea:focus, .form-control:focus, .form-select:focus {
+            border-color: var(--brand-indigo) !important;
+            box-shadow: 0 0 0 4px rgba(59, 130, 110, 0.15);
         }
 
-        /* Buttons */
+        /* Action Buttons */
         .btn-indigo {
             background: var(--brand-indigo);
-            color: #ffffff;
+            color: #ffffff !important;
             font-weight: 600;
             border: none;
             border-radius: 8px;
@@ -136,23 +161,52 @@
         .btn-indigo:hover {
             background: var(--brand-indigo-hover);
             transform: translateY(-1px);
-            color: #ffffff;
         }
 
         .btn-outline-indigo {
             background: transparent;
-            color: var(--brand-indigo);
+            color: var(--brand-indigo) !important;
             font-weight: 600;
-            border: 1px solid var(--brand-indigo);
+            border: 1px solid var(--brand-indigo) !important;
             border-radius: 8px;
             padding: 0.75rem 1.75rem;
             transition: all 0.2s ease;
         }
 
         .btn-outline-indigo:hover {
+            background: var(--brand-indigo-light) !important;
+            color: var(--brand-indigo) !important;
+            transform: translateY(-1px);
+        }
+
+        .btn-light {
+            background-color: var(--input-bg) !important;
+            color: var(--text-main) !important;
+            border: 1px solid var(--border-color) !important;
+        }
+
+        .btn-light:hover {
+            background-color: var(--brand-indigo-light) !important;
+            color: var(--brand-indigo) !important;
+        }
+
+        .theme-toggle-btn {
+            background: transparent;
+            border: 1px solid var(--border-color);
+            color: var(--text-main);
+            border-radius: 50%;
+            width: 38px;
+            height: 38px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .theme-toggle-btn:hover {
             background: var(--brand-indigo-light);
             color: var(--brand-indigo);
-            transform: translateY(-1px);
         }
 
         .promo-pill {
@@ -167,18 +221,41 @@
             gap: 0.5rem;
         }
 
-        .animate-pulse {
-            animation: pulse 2s infinite;
-        }
-
-        @keyframes pulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.15); }
-            100% { transform: scale(1); }
+        /* Dusty Rose Custom Accent Pill */
+        .badge-rose {
+            background-color: rgba(219, 154, 154, 0.2) !important;
+            color: #9E4B4B !important;
+            border: 1px solid rgba(219, 154, 154, 0.4);
         }
 
         .cursor-pointer {
             cursor: pointer;
+        }
+
+        /* Hero & Auth Carousels */
+        .hero-carousel .carousel-item {
+            height: 420px;
+            border-radius: 20px;
+            overflow: hidden;
+        }
+
+        .hero-carousel img {
+            height: 100%;
+            object-fit: cover;
+            filter: brightness(0.78);
+        }
+
+        .auth-carousel .carousel-item {
+            height: 100%;
+            min-height: 520px;
+            border-radius: 20px;
+            overflow: hidden;
+        }
+
+        .auth-carousel img {
+            height: 100%;
+            object-fit: cover;
+            filter: brightness(0.7);
         }
     </style>
 </head>
@@ -188,35 +265,32 @@
     <nav class="navbar navbar-expand-lg navbar-custom py-3">
         <div class="container">
             
-            <!-- Custom Brand SVG Logo Mark -->
+            <!-- Brand SVG Logo -->
             <a class="navbar-brand d-flex align-items-center gap-2" href="{% url 'index' %}">
                 <svg width="34" height="34" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg" class="brand-logo-icon">
                     <defs>
                         <linearGradient id="logoGrad" x1="0" y1="0" x2="40" y2="40" gradientUnits="userSpaceOnUse">
-                            <stop stop-color="#6366F1"/>
-                            <stop offset="1" stop-color="#4F46E5"/>
+                            <stop stop-color="#3B826E"/>
+                            <stop offset="1" stop-color="#2D6656"/>
                         </linearGradient>
                         <linearGradient id="nodeGrad" x1="0" y1="0" x2="40" y2="0" gradientUnits="userSpaceOnUse">
-                            <stop stop-color="#38BDF8"/>
-                            <stop offset="1" stop-color="#818CF8"/>
+                            <stop stop-color="#DB9A9A"/>
+                            <stop offset="1" stop-color="#B8DDD1"/>
                         </linearGradient>
                     </defs>
 
-                    <!-- Outer Connection Mesh -->
                     <circle cx="20" cy="20" r="18" stroke="url(#logoGrad)" stroke-width="2.5" stroke-dasharray="4 2.5" opacity="0.45"/>
                     <path d="M 6 20 C 6 11, 34 11, 34 20 C 34 29, 6 29, 6 20 Z" stroke="url(#logoGrad)" stroke-width="1.8" opacity="0.6" fill="none"/>
                     <path d="M 20 6 C 11 6, 11 34, 20 34 C 29 34, 29 6, 20 6 Z" stroke="url(#logoGrad)" stroke-width="1.8" opacity="0.6" fill="none"/>
 
-                    <!-- Network Orbit Nodes -->
                     <circle cx="20" cy="20" r="4.5" fill="url(#logoGrad)"/>
                     <circle cx="11" cy="13" r="3" fill="url(#nodeGrad)"/>
                     <circle cx="29" cy="27" r="3" fill="url(#nodeGrad)"/>
-                    <circle cx="27" cy="11" r="2.5" fill="#4F46E5"/>
-                    <circle cx="13" cy="29" r="2.5" fill="#4F46E5"/>
+                    <circle cx="27" cy="11" r="2.5" fill="#3B826E"/>
+                    <circle cx="13" cy="29" r="2.5" fill="#3B826E"/>
 
-                    <!-- Connection Bridges -->
-                    <line x1="11" y1="13" x2="20" y2="20" stroke="#818CF8" stroke-width="1.5" opacity="0.8"/>
-                    <line x1="20" y1="20" x2="29" y2="27" stroke="#818CF8" stroke-width="1.5" opacity="0.8"/>
+                    <line x1="11" y1="13" x2="20" y2="20" stroke="#B8DDD1" stroke-width="1.5" opacity="0.8"/>
+                    <line x1="20" y1="20" x2="29" y2="27" stroke="#B8DDD1" stroke-width="1.5" opacity="0.8"/>
                 </svg>
 
                 <span style="font-weight: 800; letter-spacing: -0.03em;">
@@ -235,20 +309,20 @@
                         <li class="nav-item"><a class="nav-link px-3" href="{% url 'directory' %}">Explore Directory</a></li>
                         <li class="nav-item"><a class="nav-link px-3" href="{% url 'chat_dashboard' %}">Messages</a></li>
 
-                        <!-- Notifications Hub Dropdown -->
+                        <!-- Notifications Dropdown -->
                         <li class="nav-item dropdown ms-lg-1 me-lg-2">
                             <a class="nav-link px-3 position-relative d-flex align-items-center gap-1" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                                 <i class="bi bi-bell-fill fs-5" style="color: var(--text-main);"></i>
                                 {% if total_notification_count > 0 %}
-                                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger animate-pulse" style="font-size: 0.65rem;">
+                                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size: 0.65rem;">
                                         {{ total_notification_count }}
                                     </span>
                                 {% endif %}
                             </a>
                             
-                            <div class="dropdown-menu dropdown-menu-end shadow-lg border-0 p-0 rounded-4 overflow-hidden mt-2" style="width: 360px; max-height: 480px;">
-                                <div class="p-3 border-bottom bg-light d-flex align-items-center justify-content-between">
-                                    <h6 class="fw-bold mb-0 text-dark">Notifications</h6>
+                            <div class="dropdown-menu dropdown-menu-end shadow-lg border p-0 rounded-4 overflow-hidden mt-2" style="width: 360px; max-height: 480px; background: var(--surface-card);">
+                                <div class="p-3 border-bottom d-flex align-items-center justify-content-between" style="background: var(--surface-card);">
+                                    <h6 class="fw-bold mb-0">Notifications</h6>
                                     <span class="badge rounded-pill px-2.5 py-1" style="color: var(--brand-indigo); background: var(--brand-indigo-light);">
                                         {{ total_notification_count|default:0 }} New
                                     </span>
@@ -256,14 +330,14 @@
 
                                 <div class="overflow-auto" style="max-height: 380px;">
                                     {% if total_notification_count > 0 %}
-                                        <!-- Connection Requests Notifications -->
+                                        <!-- Pending Connections -->
                                         {% for conn in pending_connections %}
                                             <a href="{% url 'profile' username=conn.sender.username %}" class="dropdown-item p-3 border-bottom d-flex align-items-center gap-3 text-wrap">
-                                                <div class="rounded-circle bg-light border d-flex align-items-center justify-content-center fw-bold flex-shrink-0" style="width: 40px; height: 40px; color: var(--brand-indigo);">
+                                                <div class="rounded-circle border d-flex align-items-center justify-content-center fw-bold flex-shrink-0" style="width: 40px; height: 40px; color: var(--brand-indigo); background: var(--brand-indigo-light);">
                                                     <i class="bi bi-person-plus-fill fs-5"></i>
                                                 </div>
                                                 <div class="flex-grow-1 min-w-0">
-                                                    <div class="text-dark text-xs mb-0">
+                                                    <div class="text-xs mb-0">
                                                         <strong>@{{ conn.sender.username }}</strong> sent you a connection request.
                                                     </div>
                                                     <span class="text-muted text-xs">{{ conn.created_at|timesince }} ago</span>
@@ -272,14 +346,14 @@
                                             </a>
                                         {% endfor %}
 
-                                        <!-- Unread Direct Messages Notifications -->
+                                        <!-- Unread Messages -->
                                         {% for msg in unread_messages %}
                                             <a href="{% url 'chat_room' username=msg.sender.username %}" class="dropdown-item p-3 border-bottom d-flex align-items-center gap-3 text-wrap">
-                                                <div class="rounded-circle bg-light border d-flex align-items-center justify-content-center fw-bold flex-shrink-0 text-success" style="width: 40px; height: 40px;">
+                                                <div class="rounded-circle border d-flex align-items-center justify-content-center fw-bold flex-shrink-0 text-success" style="width: 40px; height: 40px; background: rgba(59, 130, 110, 0.15);">
                                                     <i class="bi bi-chat-dots-fill fs-5"></i>
                                                 </div>
                                                 <div class="flex-grow-1 min-w-0">
-                                                    <div class="text-dark text-xs mb-1">
+                                                    <div class="text-xs mb-1">
                                                         <strong>@{{ msg.sender.username }}</strong> sent a message.
                                                     </div>
                                                     <p class="text-muted text-xs mb-0 text-truncate" style="max-width: 180px;">
@@ -300,7 +374,7 @@
                         </li>
 
                         <li class="nav-item">
-                            <a class="nav-link px-3 fw-semibold text-dark" href="{% url 'profile' username=request.user.username %}">
+                            <a class="nav-link px-3 fw-semibold" href="{% url 'profile' username=request.user.username %}" style="color: var(--text-main) !important;">
                                 Workspace (@{{ request.user.username }})
                             </a>
                         </li>
@@ -313,54 +387,74 @@
                             <a class="btn btn-indigo btn-sm px-4" href="{% url 'register' %}">Get Started</a>
                         </li>
                     {% endif %}
+
+                    <!-- Dark/Light Mode Theme Switch Button -->
+                    <li class="nav-item ms-lg-2">
+                        <button class="theme-toggle-btn" id="themeToggleBtn" onclick="toggleTheme()" title="Toggle Dark Mode">
+                            <i class="bi bi-moon-stars-fill" id="themeIcon"></i>
+                        </button>
+                    </li>
                 </ul>
             </div>
         </div>
     </nav>
 
-    <!-- Global Flash Alert Messages -->
+    <!-- Global Messages -->
     {% if messages %}
         <div class="container mt-4">
             {% for message in messages %}
                 <div class="alert alert-{% if message.tags == 'error' %}danger{% else %}{{ message.tags|default:'info' }}{% endif %} alert-dismissible fade show shadow-sm border-0" role="alert">
-                    {% if message.tags == 'error' %}
-                        <i class="bi bi-exclamation-triangle-fill me-2"></i>
-                    {% else %}
-                        <i class="bi bi-check-circle-fill me-2"></i>
-                    {% endif %}
-                    {{ message }}
+                    <i class="bi bi-info-circle-fill me-2"></i> {{ message }}
                     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                 </div>
             {% endfor %}
         </div>
     {% endif %}
 
-    <!-- Main Dynamic Content Injection -->
+    <!-- Main Content -->
     <main class="flex-grow-1">
         {% block content %}
         {% endblock %}
     </main>
 
-    <!-- Global Footer -->
-    <footer class="bg-white border-top py-4 mt-auto">
+    <!-- Footer -->
+    <footer class="border-top py-4 mt-auto" style="background: var(--surface-card);">
         <div class="container text-center text-muted small">
             &copy; {% now "Y" %} AlumniSphere Platform. Designed for connected institutions.
         </div>
     </footer>
 
-    <!-- Bootstrap 5 JavaScript Bundle -->
+    <!-- Bootstrap 5 JS & AOS Script -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-    
-    <!-- AOS Scroll Animations Script -->
     <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
+    
     <script>
+        function applySavedTheme() {
+            const savedTheme = localStorage.getItem('theme') || 'light';
+            document.documentElement.setAttribute('data-bs-theme', savedTheme);
+            const icon = document.getElementById('themeIcon');
+            if (icon) {
+                icon.className = savedTheme === 'dark' ? 'bi bi-sun-fill' : 'bi bi-moon-stars-fill';
+            }
+        }
+
+        function toggleTheme() {
+            const currentTheme = document.documentElement.getAttribute('data-bs-theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            document.documentElement.setAttribute('data-bs-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+            
+            const icon = document.getElementById('themeIcon');
+            if (icon) {
+                icon.className = newTheme === 'dark' ? 'bi bi-sun-fill' : 'bi bi-moon-stars-fill';
+            }
+        }
+
         document.addEventListener("DOMContentLoaded", function() {
-            AOS.init({
-                duration: 800,
-                easing: 'cubic-bezier(0.16, 1, 0.3, 1)',
-                once: true,
-                offset: 40
-            });
+            applySavedTheme();
+            if (typeof AOS !== 'undefined') {
+                AOS.init({ duration: 800, once: true });
+            }
         });
     </script>
 </body>

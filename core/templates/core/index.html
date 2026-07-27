@@ -1,154 +1,95 @@
 {% extends 'core/base.html' %}
 
-{% block title %}Welcome to AlumniSphere | Institutional Legacy Meets Opportunity{% endblock %}
+{% block title %}Welcome to AlumniSphere | Institutional Network{% endblock %}
 
 {% block content %}
-<!-- Premium Radial Gradient Background Layer -->
-<div style="background: radial-gradient(circle at 50% -20%, #f0fdf4 0%, transparent 50%), radial-gradient(circle at 90% 10%, rgba(79, 70, 229, 0.05) 0%, transparent 45%); min-height: 85vh; display: flex; align-items: center;">
-    <div class="container py-5">
-        
-        <!-- Hero Section Title Matrix -->
-        <div class="row align-items-center justify-content-center text-center mb-5">
-            <div class="col-lg-10">
-                <div class="mb-4" data-aos="fade-down">
-                    <div class="promo-pill">
-                        ✨ Introducing AlumniSphere 1.0 Production Platform
-                    </div>
-                </div>
-                
-                <h1 class="display-3 fw-extrabold mb-4 text-dark tracking-tight" 
-                    style="font-weight: 800; letter-spacing: -0.04em; line-height: 1.15;"
-                    data-aos="fade-up" 
-                    data-aos-delay="100">
-                    Where Institutional Legacy Meets <br><span class="gradient-text">Professional Opportunity</span>
-                </h1>
-                
-                <p class="lead mb-4 mx-auto px-lg-5" 
-                   style="max-width: 760px; font-size: 1.25rem; line-height: 1.6; color: var(--text-muted);"
-                   data-aos="fade-up" 
-                   data-aos-delay="200">
-                    Bridge the structural gap between university students and globally bits of established alumni networks. Share direct job openings, manage milestone mentorship tracks, and scale your path.
-                </p>
+<div class="container py-5">
+    
+    <!-- Hero Section with Slideshow Grid -->
+    <div class="row align-items-center g-5 my-3">
+        <div class="col-lg-6" data-aos="fade-right">
+            <span class="promo-pill mb-3">
+                <i class="bi bi-stars"></i> Introducing AlumniSphere 1.0 Production Platform
+            </span>
+            
+            <h1 class="display-4 fw-extrabold text-main-color mt-2 mb-4" style="line-height: 1.15; font-weight: 800;">
+                Where Institutional Legacy Meets <span style="color: var(--brand-indigo);">Professional Opportunity</span>
+            </h1>
+            
+            <p class="lead text-muted-color mb-4 fs-5" style="line-height: 1.6;">
+                Bridge the structural gap between university students and globally established alumni networks. Share direct job openings, manage milestone mentorship tracks, and scale your path.
+            </p>
 
-                <!-- Permanent Search Input Bar Component -->
-                <div class="row justify-content-center mb-5" data-aos="fade-up" data-aos-delay="250">
-                    <div class="col-md-8 col-lg-6">
-                        <form method="GET" action="" class="position-relative shadow-sm border border-light" style="border-radius: 12px; overflow: hidden;">
-                            <input type="text" name="q" value="{{ query|default:'' }}" placeholder="Search for an alumnus or student by name or username..." class="form-control form-control-lg border-0 px-4 py-3 bg-white text-sm" style="font-size: 0.95rem; padding-right: 3.5rem;" autocomplete="off">
-                            <button type="submit" class="btn position-absolute top-50 end-0 translate-middle-y text-indigo border-0 bg-transparent pe-4 ps-2">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" class="bi bi-search" viewBox="0 0 16 16">
-                                    <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0"/>
-                                </svg>
-                            </button>
-                        </form>
-                    </div>
+            <!-- Search Form Bar -->
+            <form method="GET" action="{% url 'directory' %}" class="mb-4">
+                <div class="input-group shadow-sm rounded-3 overflow-hidden border border-custom">
+                    <input type="text" name="q" class="form-control border-0 py-3 px-4 text-main-color" placeholder="Search for an alumnus or student by name or username..." style="background-color: var(--surface-card) !important;">
+                    <button class="btn btn-indigo px-4" type="submit">
+                        <i class="bi bi-search fs-5"></i>
+                    </button>
+                </div>
+            </form>
+
+            <div class="d-flex flex-wrap gap-3">
+                <a href="{% url 'directory' %}" class="btn btn-indigo px-4 py-3 text-white fw-semibold">
+                    <i class="bi bi-compass me-1"></i> Explore Directory
+                </a>
+                {% if not request.user.is_authenticated %}
+                    <a href="{% url 'register' %}" class="btn btn-outline-indigo px-4 py-3 fw-semibold">
+                        Join Network
+                    </a>
+                {% else %}
+                    <a href="{% url 'feed' %}" class="btn btn-outline-indigo px-4 py-3 fw-semibold">
+                        View Network Feed
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Right Side Hero Image Slideshow -->
+        <div class="col-lg-6" data-aos="fade-left">
+            <div id="heroCarousel" class="carousel slide carousel-fade hero-carousel shadow-lg" data-bs-ride="carousel">
+                <div class="carousel-indicators">
+                    <button type="button" data-bs-target="#heroCarousel" data-bs-slide-to="0" class="active"></button>
+                    <button type="button" data-bs-target="#heroCarousel" data-bs-slide-to="1"></button>
+                    <button type="button" data-bs-target="#heroCarousel" data-bs-slide-to="2"></button>
                 </div>
 
-                <!-- Reactive Search Results Drop-Deck Panel -->
-                {% if query %}
-                    <div class="row justify-content-center mb-5 text-start animate-fade-in" data-aos="fade-up">
-                        <div class="col-md-9 col-lg-7">
-                            <div class="d-flex align-items-center justify-content-between mb-2 px-1">
-                                <span class="text-xs fw-bold text-uppercase tracking-wider text-muted">Network Search Results for "{{ query }}"</span>
-                                <a href="{% url 'home' %}" class="text-xs text-decoration-none text-indigo fw-medium">Clear Results</a>
-                            </div>
-                            
-                            <div class="premium-card bg-white p-0 border shadow-lg" style="border-radius: 12px; overflow: hidden;">
-                                {% if search_results %}
-                                    <div class="list-group list-group-flush">
-                                        {% for person in search_results %}
-                                            <div class="list-group-item p-3 d-flex align-items-center justify-content-between border-bottom border-light">
-                                                <div class="d-flex align-items-center min-w-0">
-                                                    <!-- Avatar Profile Block Mock -->
-                                                    <div class="rounded-circle bg-light d-flex align-items-center justify-content-center fw-bold text-indigo border me-3 flex-shrink-0" style="width: 42px; height: 42px; font-size: 1.05rem;">
-                                                        {{ person.username|slice:":1"|upper }}
-                                                    </div>
-                                                    <div class="min-w-0">
-                                                        <h6 class="mb-0 text-sm fw-semibold text-dark text-truncate">
-                                                            {% if person.first_name %}{{ person.first_name }} {{ person.last_name }}{% else %}@{{ person.username }}{% endif %}
-                                                        </h6>
-                                                        <span class="text-xs text-muted d-block">@{{ person.username }}</span>
-                                                    </div>
-                                                </div>
-                                                <!-- Direct Message Router Action Button -->
-                                                <a href="{% url 'chat_room' person.username %}" class="btn btn-sm btn-indigo text-xs px-3 py-1.5" style="border-radius: 6px;">
-                                                    Open Chat
-                                                </a>
-                                            </div>
-                                        {% endfor %}
-                                    </div>
-                                {% else %}
-                                    <div class="p-4 text-center text-muted text-sm bg-light-subtle">
-                                        We couldn't discover anyone matching "{{ query }}" across the closed network directory.
-                                    </div>
-                                {% endif %}
-                            </div>
+                <div class="carousel-inner rounded-4">
+                    <div class="carousel-item active" data-bs-interval="3500">
+                        <img src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&w=1200&q=80" class="d-block w-100" alt="Collaboration">
+                        <div class="carousel-caption text-start p-4">
+                            <h5 class="fw-bold text-white">Collaborative Ecosystem</h5>
+                            <p class="small text-white-50 mb-0">Connect directly with industry leaders and university peers.</p>
                         </div>
                     </div>
-                    <hr class="my-5 opacity-25" style="max-width: 80%; margin: 0 auto;">
-                {% endif %}
-                
-                <div class="d-flex justify-content-center gap-3" data-aos="fade-up" data-aos-delay="300">
-                    <a href="{% url 'directory' %}" class="btn btn-indigo px-4 py-3 shadow-sm">
-                        Explore Directory
-                    </a>
-                    <a href="#features" class="btn btn-outline-indigo px-4 py-3">See How It Works</a>
-                </div>
-            </div>
-        </div>
+                    
+                    <div class="carousel-item" data-bs-interval="3500">
+                        <img src="https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&w=1200&q=80" class="d-block w-100" alt="Mentorship">
+                        <div class="carousel-caption text-start p-4">
+                            <h5 class="fw-bold text-white">1:1 Mentorship Hub</h5>
+                            <p class="small text-white-50 mb-0">Schedule structured career advice and guidance sessions.</p>
+                        </div>
+                    </div>
 
-        <!-- Metric Counter Grid Components -->
-        <div class="row g-4 mt-5 pt-4 text-center" data-aos="fade-up" data-aos-delay="400">
-            <div class="col-md-4">
-                <div class="premium-card">
-                    <div class="stat-number">5,000+</div>
-                    <p class="fw-semibold mb-0 text-uppercase small" style="color: var(--text-muted); letter-spacing: 0.05em;">Verified Global Alumni</p>
+                    <div class="carousel-item" data-bs-interval="3500">
+                        <img src="https://images.unsplash.com/photo-1531482615713-2afd69097998?auto=format&fit=crop&w=1200&q=80" class="d-block w-100" alt="Networking">
+                        <div class="carousel-caption text-start p-4">
+                            <h5 class="fw-bold text-white">Interactive Professional Feed</h5>
+                            <p class="small text-white-50 mb-0">Share milestones, insights, and job vacancies seamlessly.</p>
+                        </div>
+                    </div>
                 </div>
-            </div>
-            <div class="col-md-4">
-                <div class="premium-card">
-                    <div class="stat-number">120+</div>
-                    <p class="fw-semibold mb-0 text-uppercase small" style="color: var(--text-muted); letter-spacing: 0.05em;">Active Mentorship Tracks</p>
-                </div>
-            </div>
-            <div class="col-md-4">
-                <div class="premium-card">
-                    <div class="stat-number">450+</div>
-                    <p class="fw-semibold mb-0 text-uppercase small" style="color: var(--text-muted); letter-spacing: 0.05em;">Enterprise Jobs Mapped</p>
-                </div>
+
+                <button class="carousel-control-prev" type="button" data-bs-target="#heroCarousel" data-bs-slide="prev">
+                    <span class="carousel-control-prev-icon"></span>
+                </button>
+                <button class="carousel-control-next" type="button" data-bs-target="#heroCarousel" data-bs-slide="next">
+                    <span class="carousel-control-next-icon"></span>
+                </button>
             </div>
         </div>
     </div>
+
 </div>
-
-<!-- Detailed Platform Features Grid Section -->
-<section id="features" class="py-5" style="border-top: 1px solid var(--border-color); background: #ffffff;">
-    <div class="container py-5">
-        <div class="text-center mb-5" data-aos="fade-up">
-            <h2 class="fw-bold text-dark tracking-tight mb-2" style="font-size: 2.2rem; font-weight: 800;">Engineered for Structural Networking</h2>
-            <p style="color: var(--text-muted);">Everything you need to turn high-value college connections into enterprise career capital.</p>
-        </div>
-
-        <div class="row g-4">
-            <div class="col-md-4" data-aos="fade-up" data-aos-delay="100">
-                <div class="premium-card h-100">
-                    <h5 class="fw-bold text-dark mb-3">Verified Directory Matrix</h5>
-                    <p style="color: var(--text-muted); font-size: 0.95rem; line-height: 1.6; margin-bottom: 0;">Search, query, and segment active workspace profiles by graduating year, current corporate employers, or core backend tech stacks seamlessly.</p>
-                </div>
-            </div>
-            <div class="col-md-4" data-aos="fade-up" data-aos-delay="200">
-                <div class="premium-card h-100">
-                    <h5 class="fw-bold text-dark mb-3">Dynamic Mentorship Pipelines</h5>
-                    <p style="color: var(--text-muted); font-size: 0.95rem; line-height: 1.6; margin-bottom: 0;">Skip outdated communication frameworks. Instantly view availability timelines and securely request direct calendar sync hooks with mentors.</p>
-                </div>
-            </div>
-            <div class="col-md-4" data-aos="fade-up" data-aos-delay="300">
-                <div class="premium-card h-100">
-                    <h5 class="fw-bold text-dark mb-3">Live Career Feed Stream</h5>
-                    <p style="color: var(--text-muted); font-size: 0.95rem; line-height: 1.6; margin-bottom: 0;">Broadcasting tech stack milestones, corporate referral vacancies, and systemic achievement updates across the closed ecosystem instantly.</p>
-                </div>
-            </div>
-        </div>
-    </div>
-</section>
 {% endblock %}

@@ -138,15 +138,32 @@ def edit_profile_view(request):
         
     return render(request, 'core/edit_profile.html', {'profile': profile})
 
+@login_required
 def directory_view(request):
-    """Queries active system user accounts with select_related optimization."""
-    role_filter = request.GET.get('role_filter', '').strip()
-    user_query = User.objects.all().select_related('profile').filter(is_active=True)
-    
-    if role_filter in ['alumni', 'student']:
-        user_query = user_query.filter(profile__role=role_filter)
-        
-    return render(request, 'core/directory.html', {'members': user_query, 'active_filter': role_filter})
+    """Displays all platform members with search and role filtering."""
+    # Ensure every registered user has a Profile
+    profiles = Profile.objects.select_related('user').all()
+
+    # Search query parameter ('q')
+    query = request.GET.get('q', '').strip()
+    if query:
+        profiles = profiles.filter(
+            Q(user__username__icontains=query) |
+            Q(user__first_name__icontains=query) |
+            Q(user__last_name__icontains=query) |
+            Q(job_title__icontains=query) |
+            Q(company__icontains=query)
+        )
+
+    # Role filter parameter ('role')
+    role_filter = request.GET.get('role', '').strip()
+    if role_filter:
+        profiles = profiles.filter(role__iexact=role_filter)
+
+    context = {
+        'profiles': profiles,
+    }
+    return render(request, 'core/directory.html', context)
 
 @login_required
 def send_connection_request(request, username):
