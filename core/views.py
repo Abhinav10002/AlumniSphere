@@ -5,7 +5,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.db import models
 from django.db.models import Q
-from core.models import Profile, Connection, Post, MentorshipSession, Message
+from core.models import Profile, Connection, Post, MentorshipSession, Message, Comment
 
 @login_required
 def index(request):
@@ -170,8 +170,10 @@ def accept_connection_request(request, username):
 
 @login_required
 def feed_view(request):
-    """Fetches post arrays with optimized foreign key joins."""
-    posts = Post.objects.all().select_related('author', 'author__profile')
+    """Fetches feed posts with preloaded comments and engagement metadata."""
+    posts = Post.objects.all().select_related('author', 'author__profile').prefetch_related(
+        'likes', 'saved_by', 'comments', 'comments__author', 'comments__author__profile'
+    )
     return render(request, 'core/feed.html', {'posts': posts})
 
 @login_required
@@ -332,3 +334,44 @@ def unread_messages_processor(request):
         count = Message.objects.filter(receiver=request.user, is_read=False).count()
         return {'unread_message_count': count, 'global_unread_count': count}
     return {'unread_message_count': 0, 'global_unread_count': 0}
+
+@login_required
+def toggle_like_post(request, post_id):
+    """Toggles like status for a post."""
+    post = get_object_or_404(Post, id=post_id)
+    if request.user in post.likes.all():
+        post.likes.remove(request.user)
+    else:
+        post.likes.add(request.user)
+    return redirect('feed')
+
+
+@login_required
+def add_comment_view(request, post_id):
+    """Submits a new comment on a post."""
+    post = get_object_or_404(Post, id=post_id)
+    if request.method == 'POST':
+        content = request.POST.get('content', '').strip()
+        if content:
+            Comment.objects.create(
+                post=post,
+                author=request.user,
+                content=content
+            )
+            messages.success(request, "Comment added.")
+        else:
+            messages.error(request, "Comment cannot be empty.")
+    return redirect('feed')
+
+
+@login_required
+def toggle_save_post(request, post_id):
+    """Bookmarks/Saves or unsaves a post."""
+    post = get_object_or_404(Post, id=post_id)
+    if request.user in post.saved_by.all():
+        post.saved_by.remove(request.user)
+        messages.info(request, "Post removed from your saved list.")
+    else:
+        post.saved_by.add(request.user)
+        messages.success(request, "Post saved successfully.")
+    return redirect('feed')

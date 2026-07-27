@@ -27,4 +27,10 @@ urlpatterns = [
     # Real-Time Messaging Workspace
     path('messages/', views.chat_dashboard, name='chat_dashboard'),
     path('messages/t/<str:username>/', views.chat_room, name='chat_room'),
+
+    path('feed/', views.feed_view, name='feed'),
+    path('feed/create/', views.create_post_view, name='create_post'),
+    path('feed/post/<int:post_id>/like/', views.toggle_like_post, name='toggle_like_post'),
+    path('feed/post/<int:post_id>/comment/', views.add_comment_view, name='add_comment'),
+    path('feed/post/<int:post_id>/save/', views.toggle_save_post, name='toggle_save_post'),
 ]

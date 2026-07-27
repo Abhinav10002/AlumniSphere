@@ -19,28 +19,25 @@
                                   name="content" 
                                   class="form-control border-0 bg-light rounded-3 p-3" 
                                   rows="3" 
-                                  placeholder="What's happening in your engineering circle, project milestone, or industry career?"></textarea>
+                                  placeholder="What's happening in your engineering circle, project milestone, or career?"></textarea>
                     </div>
 
                     <!-- File Upload Previews Container -->
                     <div id="filePreview" class="d-flex flex-wrap gap-2 mb-3"></div>
 
                     <div class="d-flex align-items-center justify-content-between pt-2 border-top">
-                        <!-- Action Toolbar -->
                         <div class="d-flex align-items-center gap-2">
-                            <!-- Photo Attachment Button -->
                             <label for="imageUpload" class="btn btn-sm btn-light border text-secondary fw-medium d-inline-flex align-items-center gap-1 cursor-pointer">
                                 <i class="bi bi-image text-primary"></i> Photo
                             </label>
                             <input type="file" id="imageUpload" name="image" accept="image/*" class="d-none" onchange="previewFile(this, 'Photo')">
 
-                            <!-- Document Attachment Button -->
                             <label for="fileUpload" class="btn btn-sm btn-light border text-secondary fw-medium d-inline-flex align-items-center gap-1 cursor-pointer">
                                 <i class="bi bi-paperclip text-success"></i> File
                             </label>
                             <input type="file" id="fileUpload" name="file_attachment" class="d-none" onchange="previewFile(this, 'File')">
 
-                            <!-- Quick Emoji Selector Dropdown -->
+                            <!-- Emoji Selector Dropdown -->
                             <div class="dropdown">
                                 <button type="button" class="btn btn-sm btn-light border text-secondary fw-medium d-inline-flex align-items-center gap-1 dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
                                     <i class="bi bi-emoji-smile text-warning"></i> Emoji
@@ -60,7 +57,6 @@
                             </div>
                         </div>
 
-                        <!-- Publish Button -->
                         <button type="submit" class="btn btn-indigo px-4 py-2 fw-semibold">Publish Update</button>
                     </div>
                 </form>
@@ -90,7 +86,7 @@
                             </div>
                         </div>
 
-                        <!-- Post Text Content (Auto-linkifies URLs) -->
+                        <!-- Post Body Content -->
                         {% if post.content %}
                             <div class="text-dark mb-3" style="line-height: 1.6; white-space: pre-line;">
                                 {{ post.content|urlize }}
@@ -117,12 +113,62 @@
                             </div>
                         {% endif %}
 
+                        <!-- Engagement Action Toolbar (Like, Comment Toggle, Save) -->
+                        <div class="d-flex align-items-center justify-content-between pt-3 border-top mt-3">
+                            <div class="d-flex align-items-center gap-2">
+                                <!-- Like Button -->
+                                <a href="{% url 'toggle_like_post' post_id=post.id %}" class="btn btn-sm {% if request.user in post.likes.all %}btn-danger{% else %}btn-light border text-secondary{% endif %} fw-semibold d-inline-flex align-items-center gap-1">
+                                    <i class="bi {% if request.user in post.likes.all %}bi-heart-fill{% else %}bi-heart{% endif %}"></i>
+                                    <span>{{ post.total_likes }}</span>
+                                </a>
+
+                                <!-- Comment Toggle Button -->
+                                <button type="button" class="btn btn-sm btn-light border text-secondary fw-semibold d-inline-flex align-items-center gap-1" data-bs-toggle="collapse" data-bs-target="#comments-{{ post.id }}" aria-expanded="false">
+                                    <i class="bi bi-chat-left-dots"></i>
+                                    <span>{{ post.total_comments }}</span>
+                                </button>
+                            </div>
+
+                            <!-- Save / Bookmark Button -->
+                            <a href="{% url 'toggle_save_post' post_id=post.id %}" class="btn btn-sm {% if request.user in post.saved_by.all %}btn-indigo{% else %}btn-light border text-secondary{% endif %} fw-semibold d-inline-flex align-items-center gap-1" title="Save Post">
+                                <i class="bi {% if request.user in post.saved_by.all %}bi-bookmark-fill{% else %}bi-bookmark{% endif %}"></i>
+                                <span>{% if request.user in post.saved_by.all %}Saved{% else %}Save{% endif %}</span>
+                            </a>
+                        </div>
+
+                        <!-- Collapsible Comments Section -->
+                        <div class="collapse mt-3 pt-3 border-top bg-light rounded-3 p-3" id="comments-{{ post.id }}">
+                            <!-- Existing Comments List -->
+                            <div class="d-flex flex-column gap-2 mb-3">
+                                {% for comment in post.comments.all %}
+                                    <div class="p-2.5 bg-white border rounded-3 text-sm">
+                                        <div class="d-flex align-items-center justify-content-between mb-1">
+                                            <a href="{% url 'profile' username=comment.author.username %}" class="fw-bold text-dark text-decoration-none small">
+                                                @{{ comment.author.username }}
+                                            </a>
+                                            <span class="text-muted text-xs">{{ comment.created_at|timesince }} ago</span>
+                                        </div>
+                                        <p class="mb-0 text-secondary small">{{ comment.content }}</p>
+                                    </div>
+                                {% empty %}
+                                    <p class="text-muted small mb-0 text-center py-2">No comments yet. Be the first to comment!</p>
+                                {% endfor %}
+                            </div>
+
+                            <!-- Add Comment Form -->
+                            <form method="POST" action="{% url 'add_comment' post_id=post.id %}" class="d-flex gap-2">
+                                {% csrf_token %}
+                                <input type="text" name="content" class="form-control form-control-sm bg-white" placeholder="Write a comment..." required>
+                                <button type="submit" class="btn btn-sm btn-indigo px-3 flex-shrink-0">Post</button>
+                            </form>
+                        </div>
+
                     </div>
                 {% endfor %}
             {% else %}
                 <div class="text-center py-5 text-muted">
                     <i class="bi bi-chat-left-dots display-4 d-block mb-3 opacity-50"></i>
-                    <p class="mb-0">The networking feed pipeline is completely silent. Be the first to publish an update!</p>
+                    <p class="mb-0">The network feed is currently empty.</p>
                 </div>
             {% endif %}
 
