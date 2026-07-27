@@ -1,98 +1,174 @@
 {% extends 'core/base.html' %}
 
-{% block title %}Chat Session | AlumniSphere{% endblock %}
+{% block title %}Chat with @{{ partner.username }} | AlumniSphere{% endblock %}
 
 {% block content %}
-<div class="container py-5 animate-fade-in" data-aos="fade-up">
+<div class="container py-4">
     <div class="row justify-content-center">
-        <div class="col-md-8">
-            <div class="premium-card bg-white d-flex flex-column p-0" style="overflow: hidden; height: 75vh; min-height: 500px;">
+        <div class="col-lg-8">
+            
+            <div class="premium-card bg-white border rounded-4 shadow-sm p-0 overflow-hidden d-flex flex-column" style="height: 80vh;">
                 
-                <!-- Chat Window Header Component -->
-                <div class="p-3 border-bottom d-flex align-items-center justify-content-between bg-light-subtle">
-                    <div class="d-flex align-items-center">
-                        <div class="me-3">
-                            {% if partner.profile.avatar %}
-                                <img src="{{ partner.profile.avatar.url }}" alt="Avatar" class="rounded-circle border" style="width: 44px; height: 44px; object-fit: cover;">
-                            {% elif chat_partner.profile.avatar %}
-                                <img src="{{ chat_partner.profile.avatar.url }}" alt="Avatar" class="rounded-circle border" style="width: 44px; height: 44px; object-fit: cover;">
-                            {% else %}
-                                <div class="rounded-circle bg-light d-flex align-items-center justify-content-center fw-bold text-secondary border" style="width: 44px; height: 44px; font-size: 1.1rem;">
-                                    {% if partner %}{{ partner.username|slice:":1"|upper }}{% else %}{{ chat_partner.username|slice:":1"|upper }}{% endif %}
-                                </div>
-                            {% endif %}
-                        </div>
+                <!-- Chat Header -->
+                <div class="p-3 border-bottom bg-white d-flex align-items-center justify-content-between">
+                    <div class="d-flex align-items-center gap-3">
+                        <a href="{% url 'chat_dashboard' %}" class="btn btn-sm btn-light border me-1">
+                            <i class="bi bi-arrow-left"></i>
+                        </a>
+                        {% if partner.profile.avatar and partner.profile.avatar.url != '/media/avatars/default.png' %}
+                            <img src="{{ partner.profile.avatar.url }}" alt="Avatar" class="rounded-circle border" style="width: 40px; height: 40px; object-fit: cover;">
+                        {% else %}
+                            <div class="rounded-circle bg-light border d-flex align-items-center justify-content-center fw-bold" style="width: 40px; height: 40px; font-size: 1rem; color: var(--brand-indigo);">
+                                {{ partner.username|slice:":1"|upper }}
+                            </div>
+                        {% endif %}
                         <div>
-                            <h6 class="mb-0 fw-bold text-dark">
-                                @{% if partner %}{{ partner.username }}{% else %}{{ chat_partner.username }}{% endif %}
+                            <h6 class="fw-bold mb-0 text-dark">
+                                {% if partner.first_name %}{{ partner.first_name }} {{ partner.last_name }}{% else %}{{ partner.username }}{% endif %}
                             </h6>
-                            <span class="text-xs text-muted">Direct Connection Thread</span>
+                            <span class="text-muted text-xs">@{{ partner.username }}</span>
                         </div>
                     </div>
-                    <div>
-                        <a href="{% url 'chat_dashboard' %}" class="btn btn-sm btn-outline-secondary px-3" style="border-radius: 6px;">&larr; Back to Inbox</a>
-                    </div>
+                    <a href="{% url 'profile' username=partner.username %}" class="btn btn-sm btn-outline-secondary">View Profile</a>
                 </div>
 
-                <!-- Chat Messages Feed Viewport -->
-                <div id="chat-messages-box" class="flex-grow-1 p-4" style="overflow-y: auto; background-color: #fafbfd;">
-                    {% if messages %}
-                        {% for message in messages %}
-                            <div class="d-flex mb-3 {% if message.sender == request.user %}justify-content-end{% else %}justify-content-start{% endif %}">
-                                <div class="p-3 shadow-2xs text-sm" style="max-width: 70%; border-radius: 14px; 
-                                    {% if message.sender == request.user %}
-                                        background-color: var(--brand-indigo); color: #ffffff; border-bottom-right-radius: 4px;
-                                    {% else %}
-                                        background-color: #ffffff; color: var(--text-main); border: 1px solid var(--border-color); border-bottom-left-radius: 4px;
-                                    {% endif %}">
-                                    <p class="mb-1 text-wrap" style="word-break: break-word;">{{ message.content }}</p>
-                                    <div class="text-xs text-end {% if message.sender == request.user %}text-white-50{% else %}text-muted{% endif %}" style="font-size: 0.65rem;">
-                                        {{ message.timestamp|date:"G:i" }}
-                                    </div>
+                <!-- Message History Stream Container -->
+                <div id="chatStream" class="p-4 flex-grow-1 overflow-auto bg-light d-flex flex-column gap-3">
+                    {% for msg in thread %}
+                        {% if msg.sender == request.user %}
+                            <!-- Sent Message Bubble (Right) -->
+                            <div class="d-flex flex-column align-items-end ms-auto style-msg" style="max-width: 75%;">
+                                <div class="p-3 rounded-4 text-white shadow-sm" style="background-color: var(--brand-indigo); border-bottom-right-radius: 4px !important;">
+                                    {% if msg.content %}
+                                        <p class="mb-0 text-break" style="line-height: 1.5;">{{ msg.content|urlize }}</p>
+                                    {% endif %}
+
+                                    {% if msg.image %}
+                                        <div class="mt-2 rounded-3 overflow-hidden border border-white border-opacity-25">
+                                            <img src="{{ msg.image.url }}" alt="Shared image" class="img-fluid" style="max-height: 260px; object-fit: cover;">
+                                        </div>
+                                    {% endif %}
+
+                                    {% if msg.file_attachment %}
+                                        <div class="mt-2 p-2 bg-white bg-opacity-10 border border-white border-opacity-25 rounded-3 d-flex align-items-center justify-content-between gap-2">
+                                            <span class="small text-truncate text-white"><i class="bi bi-file-earmark-arrow-down-fill me-1"></i> {{ msg.file_attachment.name|slice:"17:" }}</span>
+                                            <a href="{{ msg.file_attachment.url }}" download class="btn btn-xs btn-light fw-bold flex-shrink-0" style="padding: 2px 8px; font-size: 0.75rem; color: var(--brand-indigo);">Download</a>
+                                        </div>
+                                    {% endif %}
+                                </div>
+                                <span class="text-muted text-xs mt-1">{{ msg.timestamp|date:"h:i A" }}</span>
+                            </div>
+                        {% else %}
+                            <!-- Received Message Bubble (Left) -->
+                            <div class="d-flex flex-column align-items-start me-auto style-msg" style="max-width: 75%;">
+                                <div class="p-3 rounded-4 bg-white border text-dark shadow-sm" style="border-bottom-left-radius: 4px !important;">
+                                    {% if msg.content %}
+                                        <p class="mb-0 text-break" style="line-height: 1.5;">{{ msg.content|urlize }}</p>
+                                    {% endif %}
+
+                                    {% if msg.image %}
+                                        <div class="mt-2 rounded-3 overflow-hidden border">
+                                            <img src="{{ msg.image.url }}" alt="Shared image" class="img-fluid" style="max-height: 260px; object-fit: cover;">
+                                        </div>
+                                    {% endif %}
+
+                                    {% if msg.file_attachment %}
+                                        <div class="mt-2 p-2 bg-light border rounded-3 d-flex align-items-center justify-content-between gap-2">
+                                            <span class="small text-truncate text-dark"><i class="bi bi-file-earmark-arrow-down-fill me-1" style="color: var(--brand-indigo);"></i> {{ msg.file_attachment.name|slice:"17:" }}</span>
+                                            <a href="{{ msg.file_attachment.url }}" download class="btn btn-xs btn-outline-secondary fw-semibold flex-shrink-0" style="padding: 2px 8px; font-size: 0.75rem;">Download</a>
+                                        </div>
+                                    {% endif %}
+                                </div>
+                                <span class="text-muted text-xs mt-1">{{ msg.timestamp|date:"h:i A" }}</span>
+                            </div>
+                        {% endif %}
+                    {% empty %}
+                        <div class="text-center my-auto text-muted py-4">
+                            <i class="bi bi-chat-square-text fs-1 d-block mb-2 opacity-50"></i>
+                            <p class="mb-0 small">No previous conversation found. Send a message to start the thread!</p>
+                        </div>
+                    {% endfor %}
+                </div>
+
+                <!-- Attachment Selection Badge Area -->
+                <div id="chatFilePreview" class="px-3 pt-2 bg-white d-flex flex-wrap gap-2"></div>
+
+                <!-- Message Input Control Form -->
+                <div class="p-3 bg-white border-top">
+                    <form method="POST" action="{% url 'chat_room' username=partner.username %}" enctype="multipart/form-data" class="d-flex align-items-center gap-2">
+                        {% csrf_token %}
+
+                        <!-- Image Attachment Button -->
+                        <label for="chatImage" class="btn btn-light border text-secondary rounded-circle d-flex align-items-center justify-content-center p-0 flex-shrink-0" style="width: 40px; height: 40px;" title="Attach Image">
+                            <i class="bi bi-image text-primary"></i>
+                        </label>
+                        <input type="file" id="chatImage" name="image" accept="image/*" class="d-none" onchange="previewChatFile(this, 'Photo')">
+
+                        <!-- Document File Attachment Button -->
+                        <label for="chatFile" class="btn btn-light border text-secondary rounded-circle d-flex align-items-center justify-content-center p-0 flex-shrink-0" style="width: 40px; height: 40px;" title="Attach File">
+                            <i class="bi bi-paperclip text-success"></i>
+                        </label>
+                        <input type="file" id="chatFile" name="file_attachment" class="d-none" onchange="previewChatFile(this, 'Document')">
+
+                        <!-- Quick Emoji Picker Dropdown -->
+                        <div class="dropdown">
+                            <button type="button" class="btn btn-light border text-secondary rounded-circle d-flex align-items-center justify-content-center p-0 flex-shrink-0" style="width: 40px; height: 40px;" data-bs-toggle="dropdown" aria-expanded="false" title="Insert Emoji">
+                                <i class="bi bi-emoji-smile text-warning"></i>
+                            </button>
+                            <div class="dropdown-menu p-2 shadow-sm border-0" style="min-width: 180px;">
+                                <div class="d-flex flex-wrap gap-2 fs-5">
+                                    <span class="emoji-btn cursor-pointer" onclick="insertChatEmoji('👍')">👍</span>
+                                    <span class="emoji-btn cursor-pointer" onclick="insertChatEmoji('🚀')">🚀</span>
+                                    <span class="emoji-btn cursor-pointer" onclick="insertChatEmoji('💡')">💡</span>
+                                    <span class="emoji-btn cursor-pointer" onclick="insertChatEmoji('🎉')">🎉</span>
+                                    <span class="emoji-btn cursor-pointer" onclick="insertChatEmoji('👏')">👏</span>
+                                    <span class="emoji-btn cursor-pointer" onclick="insertChatEmoji('🔥')">🔥</span>
+                                    <span class="emoji-btn cursor-pointer" onclick="insertChatEmoji('💻')">💻</span>
+                                    <span class="emoji-btn cursor-pointer" onclick="insertChatEmoji('🎓')">🎓</span>
                                 </div>
                             </div>
-                        {% endfor %}
-                    {% else %}
-                        <!-- Conversation Starter Fallback State -->
-                        <div class="h-100 d-flex flex-column align-items-center justify-content-center text-center py-5">
-                            <div class="mb-3 text-muted">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" fill="currentColor" class="bi bi-chat-heart text-secondary opacity-50" viewBox="0 0 16 16">
-                                    <path d="M8 15c4.418 0 8-3.134 8-7s-3.582-7-8-7-8 3.134-8 7c0 1.76.743 3.37 1.97 4.6-.097.382-.411 1.474-1.243 2.54a.5.5 0 0 0 .58.751 7 7 0 0 0 3.79-1.14c.73.17 1.496.249 2.26.25m0-1c-.638 0-1.277-.06-1.9-.177a.5.5 0 0 0-.416.103l-2.07 1.554C4.332 14.1 4.7 13.24 4.847 12.72a.5.5 0 0 0-.173-.526C3.498 11.272 2.857 10.007 2.857 8c0-3.314 2.302-6 5.143-6s5.143 2.686 5.143 6-2.302 6-5.143 6"/>
-                                </svg>
-                            </div>
-                            <h6 class="fw-bold text-dark">Start of a new conversation</h6>
-                            <p class="text-muted small px-3 mb-0" style="max-width: 320px;">Send a message below to break the ice and start networking!</p>
                         </div>
-                    {% endif %}
-                </div>
 
-                <!-- Message Form Submission Container -->
-                <div class="p-3 border-top bg-white">
-                    <form method="POST" action="" class="d-flex gap-2">
-                        {% csrf_token %}
-                        <input type="text" name="content" placeholder="Type your message here..." class="form-control px-3 border" style="border-radius: 8px; font-size: 0.92rem;" required autocomplete="off">
-                        <button type="submit" class="btn btn-indigo d-flex align-items-center gap-2 px-4" style="border-radius: 8px;">
-                            <span>Send</span>
-                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" class="bi bi-send-fill" viewBox="0 0 16 16">
-                                <path d="M15.964.686a.5.5 0 0 0-.65-.65L.767 5.855H.766l-.452.18a.5.5 0 0 0-.082.887l.41.26.001.002 4.995 3.178 3.178 4.995.002.002.26.41a.5.5 0 0 0 .886-.083zm-1.833 1.89L6.637 10.07l-.215-.338a.5.5 0 0 0-.154-.154l-.338-.215 7.494-7.494 1.178-.471z"/>
-                            </svg>
+                        <!-- Chat Message Input Field -->
+                        <input type="text" id="chatInput" name="content" class="form-control bg-light border-0 py-2 px-3 rounded-pill" placeholder="Type a message..." autocomplete="off">
+
+                        <!-- Message Send Button -->
+                        <button type="submit" class="btn btn-indigo rounded-circle d-flex align-items-center justify-content-center p-0 flex-shrink-0" style="width: 40px; height: 40px; background-color: var(--brand-indigo); border: none;">
+                            <i class="bi bi-send-fill text-white"></i>
                         </button>
                     </form>
                 </div>
 
             </div>
+
         </div>
     </div>
 </div>
 
-<!-- Dynamic Interface Execution Layer -->
 <script>
+    // Automatically auto-scroll chat window to latest message on page render
     document.addEventListener("DOMContentLoaded", function() {
-        var messageBox = document.getElementById("chat-messages-box");
-        if (messageBox) {
-            // Automatically pin view frame scrollbar to the bottommost message block
-            messageBox.scrollTop = messageBox.scrollHeight;
+        const chatStream = document.getElementById('chatStream');
+        if (chatStream) {
+            chatStream.scrollTop = chatStream.scrollHeight;
         }
     });
+
+    function insertChatEmoji(emoji) {
+        const input = document.getElementById('chatInput');
+        input.value += emoji;
+        input.focus();
+    }
+
+    function previewChatFile(input, labelType) {
+        const previewContainer = document.getElementById('chatFilePreview');
+        if (input.files && input.files[0]) {
+            const fileName = input.files[0].name;
+            const badge = document.createElement('span');
+            badge.className = 'badge bg-light border text-dark p-2 d-inline-flex align-items-center gap-2';
+            badge.innerHTML = `<i class="bi bi-check-circle-fill text-success"></i> ${labelType}: ${fileName}`;
+            previewContainer.appendChild(badge);
+        }
+    }
 </script>
 {% endblock %}

@@ -9,7 +9,7 @@ from core.models import Profile, Connection, Post, MentorshipSession, Message
 
 @login_required
 def index(request):
-    """Renders the platform homepage with a reactive user discovery search system."""
+    """Renders platform homepage with user search capability."""
     query = request.GET.get('q', '').strip()
     search_results = None
 
@@ -104,7 +104,7 @@ def profile_view(request, username):
 
 @login_required
 def edit_profile_view(request):
-    """Processes profile modifications and file avatar uploads securely."""
+    """Processes profile modifications, avatar uploads, and CV/Resume attachments."""
     profile, _ = Profile.objects.get_or_create(user=request.user)
     
     if request.method == 'POST':
@@ -125,11 +125,15 @@ def edit_profile_view(request):
         profile.linkedin_url = request.POST.get('linkedin_url', '')
         profile.github_url = request.POST.get('github_url', '')
         
+        # Handle file uploads
         if 'avatar' in request.FILES:
             profile.avatar = request.FILES['avatar']
+            
+        if 'cv' in request.FILES:
+            profile.cv = request.FILES['cv']
 
         profile.save()
-        messages.success(request, "Your profile parameters have been updated.")
+        messages.success(request, "Your profile and CV parameters have been updated.")
         return redirect('profile', username=request.user.username)
         
     return render(request, 'core/edit_profile.html', {'profile': profile})
@@ -290,24 +294,31 @@ def chat_dashboard(request):
 
 @login_required
 def chat_room(request, username):
-    """Handles 1:1 direct messaging threads between two users."""
+    """Handles 1:1 direct messaging threads with text, image, and document support."""
     partner = get_object_or_404(User, username=username)
     
     if request.method == 'POST':
         content = request.POST.get('content', '').strip() or request.POST.get('body', '').strip()
-        if content:
+        image = request.FILES.get('image')
+        file_attachment = request.FILES.get('file_attachment')
+
+        if content or image or file_attachment:
             Message.objects.create(
                 sender=request.user,
                 receiver=partner,
-                content=content
+                content=content,
+                image=image,
+                file_attachment=file_attachment
             )
         return redirect('chat_room', username=username)
     
+    # GET: Retrieve message history thread
     thread = Message.objects.filter(
         (Q(sender=request.user) & Q(receiver=partner)) |
         (Q(sender=partner) & Q(receiver=request.user))
     ).order_by('timestamp')
     
+    # Clear unread markers for incoming messages
     Message.objects.filter(sender=partner, receiver=request.user, is_read=False).update(is_read=True)
     
     return render(request, 'core/chat_room.html', {

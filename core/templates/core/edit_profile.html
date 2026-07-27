@@ -1,102 +1,135 @@
 {% extends 'core/base.html' %}
 
-{% block title %}Manage Workspace Profile | AlumniSphere{% endblock %}
+{% block title %}Edit Profile | AlumniSphere{% endblock %}
 
 {% block content %}
 <div class="container py-5">
     <div class="row justify-content-center">
-        <div class="col-md-8">
-            <div class="auth-card" style="max-width: 100%;">
-                <h3 class="fw-bold text-dark mb-1">Profile Configuration Workspace</h3>
-                <p class="text-muted small mb-4">Update your structural parameters to improve match visibility across the platform directory.</p>
+        <div class="col-lg-8">
+            
+            <div class="premium-card bg-white border rounded-4 p-4 p-md-5 shadow-sm">
+                
+                <div class="d-flex align-items-center justify-content-between mb-4 pb-3 border-bottom">
+                    <div>
+                        <h4 class="fw-bold text-dark mb-1">Edit Profile Parameters</h4>
+                        <p class="text-muted small mb-0">Update your professional information, media attachments, and public details.</p>
+                    </div>
+                    <a href="{% url 'profile' username=request.user.username %}" class="btn btn-sm btn-light border">Cancel</a>
+                </div>
 
-                <!-- enctype added for handling image upload files -->
-                <form method="POST" enctype="multipart/form-data" novalidate>
+                <form method="POST" action="{% url 'edit_profile' %}" enctype="multipart/form-data">
                     {% csrf_token %}
-                    
-                    <!-- Avatar File Field -->
-                    <div class="mb-4 pb-3 border-bottom">
-                        <label class="form-label fw-bold">Profile Picture</label>
-                        <div class="d-flex align-items-center gap-3">
-                            {% if request.user.profile.avatar %}
-                                <img src="{{ request.user.profile.avatar.url }}" alt="Avatar" class="rounded-circle border" style="width: 60px; height: 60px; object-fit: cover;">
+
+                    <!-- Media Uploads Section -->
+                    <h6 class="fw-bold text-dark mb-3">Profile Assets</h6>
+                    <div class="row g-3 mb-4">
+                        <!-- Avatar File Field -->
+                        <div class="col-md-6">
+                            <label for="avatar" class="form-label fw-semibold text-dark small">Profile Avatar</label>
+                            <input type="file" id="avatar" name="avatar" accept="image/*" class="form-control">
+                            {% if profile.avatar %}
+                                <div class="form-text mt-1 text-muted small">
+                                    Current: <span class="fw-semibold text-dark">{{ profile.avatar.name|slice:"8:" }}</span>
+                                </div>
                             {% endif %}
-                            <input type="file" name="avatar" class="form-control-custom">
+                        </div>
+
+                        <!-- CV / Resume File Field -->
+                        <div class="col-md-6">
+                            <label for="cv" class="form-label fw-semibold text-dark small">CV / Resume Document</label>
+                            <input type="file" id="cv" name="cv" accept=".pdf,.doc,.docx" class="form-control">
+                            {% if profile.cv %}
+                                <div class="form-text mt-1 text-success small">
+                                    <i class="bi bi-file-earmark-check-fill me-1"></i> Current CV: <span class="fw-semibold text-dark">{{ profile.cv.name|slice:"5:" }}</span>
+                                </div>
+                            {% else %}
+                                <div class="form-text mt-1 text-muted small">Supports PDF, DOC, or DOCX files.</div>
+                            {% endif %}
                         </div>
                     </div>
 
-                    <!-- Personal Names -->
+                    <hr class="my-4">
+
+                    <!-- Personal Information -->
+                    <h6 class="fw-bold text-dark mb-3">Personal & Academic Details</h6>
                     <div class="row g-3 mb-3">
                         <div class="col-md-6">
-                            <label class="form-label">First Name</label>
-                            <input type="text" name="first_name" class="form-control-custom" value="{{ request.user.first_name }}">
+                            <label for="first_name" class="form-label fw-semibold text-dark small">First Name</label>
+                            <input type="text" id="first_name" name="first_name" value="{{ request.user.first_name }}" class="form-control" placeholder="John">
                         </div>
                         <div class="col-md-6">
-                            <label class="form-label">Last Name</label>
-                            <input type="text" name="last_name" class="form-control-custom" value="{{ request.user.last_name }}">
+                            <label for="last_name" class="form-label fw-semibold text-dark small">Last Name</label>
+                            <input type="text" id="last_name" name="last_name" value="{{ request.user.last_name }}" class="form-control" placeholder="Doe">
                         </div>
                     </div>
 
-                    <!-- Email & Role -->
                     <div class="row g-3 mb-3">
                         <div class="col-md-6">
-                            <label class="form-label">Email Address</label>
-                            <input type="email" name="email" class="form-control-custom" value="{{ request.user.email }}">
+                            <label for="email" class="form-label fw-semibold text-dark small">Email Address</label>
+                            <input type="email" id="email" name="email" value="{{ request.user.email }}" class="form-control" placeholder="john@example.com">
                         </div>
                         <div class="col-md-6">
-                            <label class="form-label">Network Role Orientation</label>
-                            <select name="role" class="form-control-custom">
-                                <option value="student" {% if request.user.profile.role == 'student' %}selected{% endif %}>Student</option>
-                                <option value="alumni" {% if request.user.profile.role == 'alumni' %}selected{% endif %}>Alumni</option>
+                            <label for="role" class="form-label fw-semibold text-dark small">Platform Role</label>
+                            <select id="role" name="role" class="form-select">
+                                <option value="student" {% if profile.role == 'student' %}selected{% endif %}>Student</option>
+                                <option value="alumni" {% if profile.role == 'alumni' %}selected{% endif %}>Alumni</option>
                             </select>
                         </div>
                     </div>
 
-                    <!-- Job Title, Company, Location & Graduation Year -->
-                    <div class="row g-3 mb-3">
-                        <div class="col-md-6">
-                            <label class="form-label">Functional Job Title</label>
-                            <input type="text" name="job_title" class="form-control-custom" value="{{ request.user.profile.job_title }}" placeholder="Systems Engineer">
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label">Current Company Enterprise</label>
-                            <input type="text" name="company" class="form-control-custom" value="{{ request.user.profile.company }}" placeholder="Stripe">
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label">Location</label>
-                            <input type="text" name="location" class="form-control-custom" value="{{ request.user.profile.location }}" placeholder="San Francisco, CA">
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label">Graduation Year</label>
-                            <input type="number" name="graduation_year" class="form-control-custom" value="{{ request.user.profile.graduation_year|default:'' }}" placeholder="2026">
-                        </div>
-                    </div>
-
-                    <!-- Biography -->
-                    <div class="mb-3">
-                        <label class="form-label">Biography Overview</label>
-                        <textarea name="bio" rows="4" class="form-control-custom" placeholder="Share your focus elements, stack specializations, or core industrial goals...">{{ request.user.profile.bio }}</textarea>
-                    </div>
-
-                    <!-- Social Media Repository Connections -->
                     <div class="row g-3 mb-4">
                         <div class="col-md-6">
-                            <label class="form-label">LinkedIn Repository Connection</label>
-                            <input type="url" name="linkedin_url" class="form-control-custom" value="{{ request.user.profile.linkedin_url }}" placeholder="https://linkedin.com/in/username">
+                            <label for="graduation_year" class="form-label fw-semibold text-dark small">Graduation / Class Year</label>
+                            <input type="number" id="graduation_year" name="graduation_year" value="{{ profile.graduation_year|default:'' }}" class="form-control" placeholder="2025">
                         </div>
                         <div class="col-md-6">
-                            <label class="form-label">GitHub Repository Connection</label>
-                            <input type="url" name="github_url" class="form-control-custom" value="{{ request.user.profile.github_url }}" placeholder="https://github.com/username">
+                            <label for="location" class="form-label fw-semibold text-dark small">Location / City</label>
+                            <input type="text" id="location" name="location" value="{{ profile.location }}" class="form-control" placeholder="San Francisco, CA">
                         </div>
                     </div>
 
-                    <!-- Action Controls -->
-                    <div class="d-flex gap-2 justify-content-end">
-                        <a href="{% url 'profile' username=request.user.username %}" class="btn btn-outline-indigo">Cancel</a>
-                        <button type="submit" class="btn btn-indigo text-white px-4">Save Changes</button>
+                    <hr class="my-4">
+
+                    <!-- Professional Information -->
+                    <h6 class="fw-bold text-dark mb-3">Work & Social Profiles</h6>
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-6">
+                            <label for="job_title" class="form-label fw-semibold text-dark small">Job Title / Specialty</label>
+                            <input type="text" id="job_title" name="job_title" value="{{ profile.job_title }}" class="form-control" placeholder="Software Engineer">
+                        </div>
+                        <div class="col-md-6">
+                            <label for="company" class="form-label fw-semibold text-dark small">Company / Organization</label>
+                            <input type="text" id="company" name="company" value="{{ profile.company }}" class="form-control" placeholder="Acme Corp">
+                        </div>
                     </div>
+
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-6">
+                            <label for="linkedin_url" class="form-label fw-semibold text-dark small">LinkedIn Profile URL</label>
+                            <input type="url" id="linkedin_url" name="linkedin_url" value="{{ profile.linkedin_url }}" class="form-control" placeholder="https://linkedin.com/in/username">
+                        </div>
+                        <div class="col-md-6">
+                            <label for="github_url" class="form-label fw-semibold text-dark small">GitHub Profile URL</label>
+                            <input type="url" id="github_url" name="github_url" value="{{ profile.github_url }}" class="form-control" placeholder="https://github.com/username">
+                        </div>
+                    </div>
+
+                    <!-- Biography Field -->
+                    <div class="mb-4">
+                        <label for="bio" class="form-label fw-semibold text-dark small">Bio / About Me</label>
+                        <textarea id="bio" name="bio" rows="4" class="form-control" placeholder="Share your career journey, interests, or mentoring background...">{{ profile.bio }}</textarea>
+                    </div>
+
+                    <!-- Save Actions -->
+                    <div class="d-flex align-items-center justify-content-end gap-3 pt-3 border-top">
+                        <a href="{% url 'profile' username=request.user.username %}" class="btn btn-light border px-4 py-2 fw-semibold">Cancel</a>
+                        <button type="submit" class="btn btn-indigo px-5 py-2 fw-semibold">Save Profile Changes</button>
+                    </div>
+
                 </form>
+
             </div>
+
         </div>
     </div>
 </div>

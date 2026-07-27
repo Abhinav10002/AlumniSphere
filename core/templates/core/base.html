@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="google" content="notranslate">
     <title>{% block title %}AlumniSphere{% endblock %}</title>
     
     <!-- Bootstrap 5 CSS Framework -->
@@ -71,7 +72,7 @@
             color: var(--brand-indigo) !important;
         }
 
-        /* Modern Premium White Cards */
+        /* Modern Premium Cards */
         .premium-card, .auth-card {
             background: var(--surface-card);
             border: 1px solid var(--border-color);
@@ -79,12 +80,6 @@
             padding: 2.5rem 2rem;
             box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05), 0 1px 2px -1px rgba(0, 0, 0, 0.05);
             transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-        }
-
-        .premium-card:hover {
-            transform: translateY(-4px);
-            border-color: rgba(79, 70, 229, 0.3);
-            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
         }
 
         /* Universal Form Inputs */
@@ -96,7 +91,6 @@
         input[type="file"],
         select,
         textarea,
-        .form-control-custom,
         .form-control,
         .form-select {
             width: 100%;
@@ -171,14 +165,18 @@
 
         @keyframes pulse {
             0% { transform: scale(1); }
-            50% { transform: scale(1.08); }
+            50% { transform: scale(1.15); }
             100% { transform: scale(1); }
+        }
+
+        .cursor-pointer {
+            cursor: pointer;
         }
     </style>
 </head>
 <body>
 
-    <!-- Header Navigation -->
+    <!-- Header Navigation Bar -->
     <nav class="navbar navbar-expand-lg navbar-custom py-3">
         <div class="container">
             <a class="navbar-brand d-flex align-items-center gap-2" href="{% url 'index' %}">
@@ -193,17 +191,70 @@
                     {% if request.user.is_authenticated %}
                         <li class="nav-item"><a class="nav-link px-3" href="{% url 'feed' %}">Network Feed</a></li>
                         <li class="nav-item"><a class="nav-link px-3" href="{% url 'directory' %}">Explore Directory</a></li>
-                        
-                        <!-- Integrated Messaging Hub -->
-                        <li class="nav-item">
-                            <a href="{% url 'chat_dashboard' %}" class="nav-link px-3 d-flex align-items-center gap-1">
-                                <span>Messages</span>
-                                {% if global_unread_count > 0 %}
-                                    <span class="badge rounded-pill bg-danger animate-pulse" style="font-size: 0.7rem; padding: 0.25em 0.6em;">
-                                        {{ global_unread_count }}
+                        <li class="nav-item"><a class="nav-link px-3" href="{% url 'chat_dashboard' %}">Messages</a></li>
+
+                        <!-- Notifications Hub Dropdown -->
+                        <li class="nav-item dropdown ms-lg-1 me-lg-2">
+                            <a class="nav-link px-3 position-relative d-flex align-items-center gap-1" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="bi bi-bell-fill fs-5" style="color: var(--text-main);"></i>
+                                {% if total_notification_count > 0 %}
+                                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger animate-pulse" style="font-size: 0.65rem;">
+                                        {{ total_notification_count }}
                                     </span>
                                 {% endif %}
                             </a>
+                            
+                            <div class="dropdown-menu dropdown-menu-end shadow-lg border-0 p-0 rounded-4 overflow-hidden mt-2" style="width: 360px; max-height: 480px;">
+                                <div class="p-3 border-bottom bg-light d-flex align-items-center justify-content-between">
+                                    <h6 class="fw-bold mb-0 text-dark">Notifications</h6>
+                                    <span class="badge rounded-pill px-2.5 py-1" style="color: var(--brand-indigo); background: var(--brand-indigo-light);">
+                                        {{ total_notification_count|default:0 }} New
+                                    </span>
+                                </div>
+
+                                <div class="overflow-auto" style="max-height: 380px;">
+                                    {% if total_notification_count > 0 %}
+                                        <!-- Connection Requests Notifications -->
+                                        {% for conn in pending_connections %}
+                                            <a href="{% url 'profile' username=conn.sender.username %}" class="dropdown-item p-3 border-bottom d-flex align-items-center gap-3 text-wrap">
+                                                <div class="rounded-circle bg-light border d-flex align-items-center justify-content-center fw-bold flex-shrink-0" style="width: 40px; height: 40px; color: var(--brand-indigo);">
+                                                    <i class="bi bi-person-plus-fill fs-5"></i>
+                                                </div>
+                                                <div class="flex-grow-1 min-w-0">
+                                                    <div class="text-dark text-xs mb-0">
+                                                        <strong>@{{ conn.sender.username }}</strong> sent you a connection request.
+                                                    </div>
+                                                    <span class="text-muted text-xs">{{ conn.created_at|timesince }} ago</span>
+                                                </div>
+                                                <span class="btn btn-sm btn-indigo py-1 px-2 text-xs flex-shrink-0" style="font-size: 0.75rem;">View</span>
+                                            </a>
+                                        {% endfor %}
+
+                                        <!-- Unread Direct Messages Notifications -->
+                                        {% for msg in unread_messages %}
+                                            <a href="{% url 'chat_room' username=msg.sender.username %}" class="dropdown-item p-3 border-bottom d-flex align-items-center gap-3 text-wrap">
+                                                <div class="rounded-circle bg-light border d-flex align-items-center justify-content-center fw-bold flex-shrink-0 text-success" style="width: 40px; height: 40px;">
+                                                    <i class="bi bi-chat-dots-fill fs-5"></i>
+                                                </div>
+                                                <div class="flex-grow-1 min-w-0">
+                                                    <div class="text-dark text-xs mb-1">
+                                                        <strong>@{{ msg.sender.username }}</strong> sent a message.
+                                                    </div>
+                                                    <p class="text-muted text-xs mb-0 text-truncate" style="max-width: 180px;">
+                                                        {% if msg.content %}{{ msg.content }}{% else %}[Attachment Shared]{% endif %}
+                                                    </p>
+                                                </div>
+                                                <span class="text-muted text-xs flex-shrink-0">{{ msg.timestamp|date:"h:i A" }}</span>
+                                            </a>
+                                        {% endfor %}
+                                    {% else %}
+                                        <div class="text-center py-4 text-muted">
+                                            <i class="bi bi-bell-slash fs-3 d-block mb-2 opacity-50"></i>
+                                            <p class="mb-0 small">No pending notifications</p>
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
                         </li>
 
                         <li class="nav-item">
@@ -242,7 +293,7 @@
         </div>
     {% endif %}
 
-    <!-- Main Content Injection -->
+    <!-- Main Dynamic Content Injection -->
     <main class="flex-grow-1">
         {% block content %}
         {% endblock %}

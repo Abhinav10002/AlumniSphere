@@ -12,9 +12,9 @@
                 
                 <!-- Profile Identity Header -->
                 <div class="d-flex align-items-center gap-4 mb-4 pb-4 border-bottom">
-                    <!-- Avatar Container -->
+                    <!-- Avatar Display -->
                     <div class="flex-shrink-0" style="width: 80px; height: 80px;">
-                        {% if profile_user.profile.avatar %}
+                        {% if profile_user.profile.avatar and profile_user.profile.avatar.url != '/media/avatars/default.png' %}
                             <img src="{{ profile_user.profile.avatar.url }}" 
                                  alt="Avatar" 
                                  class="rounded-circle border shadow-sm w-100 h-100" 
@@ -27,7 +27,7 @@
                         {% endif %}
                     </div>
 
-                    <!-- User Meta Information -->
+                    <!-- User Meta Info -->
                     <div class="flex-grow-1 min-w-0">
                         <div class="d-flex align-items-center gap-2 mb-1">
                             <h3 class="fw-bold text-dark mb-0 text-truncate">
@@ -57,26 +57,39 @@
                     </div>
                 </div>
 
-                <!-- Action Button Controls -->
+                <!-- Action Toolbar & Buttons -->
                 <div class="d-flex flex-wrap align-items-center gap-3">
                     {% if profile_user != request.user %}
+                        <!-- Direct Message Button -->
                         <a href="{% url 'chat_room' username=profile_user.username %}" class="btn btn-indigo px-4 py-2 fw-semibold d-inline-flex align-items-center gap-2">
                             <i class="bi bi-chat-dots-fill"></i> Send Message
                         </a>
 
+                        <!-- Connection Request State Handler -->
                         {% if connection_status == 'connected' %}
                             <span class="badge bg-success-subtle text-success py-2 px-3 border border-success-subtle">Connected</span>
                         {% elif connection_status == 'sent_pending' %}
                             <button class="btn btn-light border text-muted py-2 px-3 small" disabled>Request Sent</button>
                         {% elif connection_status == 'received_pending' %}
-                            <a href="{% url 'accept_connection_request' username=profile_user.username %}" class="btn btn-outline-success py-2 px-3">Accept Request</a>
+                            <a href="{% url 'accept_connection_request' username=profile_user.username %}" class="btn btn-success py-2 px-3 fw-semibold d-inline-flex align-items-center gap-1">
+                                <i class="bi bi-check-lg"></i> Accept Connection Request
+                            </a>
                         {% else %}
                             <a href="{% url 'send_connection_request' username=profile_user.username %}" class="btn btn-outline-secondary py-2 px-3">Connect Request</a>
                         {% endif %}
                     {% else %}
+                        <!-- Profile Owner Edit Button -->
                         <a href="{% url 'edit_profile' %}" class="btn btn-light border px-4 py-2 fw-semibold">Edit Profile</a>
                     {% endif %}
 
+                    <!-- Download CV/Resume Button -->
+                    {% if profile_user.profile.cv %}
+                        <a href="{{ profile_user.profile.cv.url }}" download class="btn btn-outline-indigo px-3 py-2 fw-semibold d-inline-flex align-items-center gap-2">
+                            <i class="bi bi-file-earmark-pdf-fill text-danger fs-5"></i> Download CV
+                        </a>
+                    {% endif %}
+
+                    <!-- Social Channels Links -->
                     {% if profile_user.profile.linkedin_url %}
                         <a href="{{ profile_user.profile.linkedin_url }}" target="_blank" rel="noopener" class="btn btn-light border px-3 py-2 text-decoration-none small fw-semibold ms-auto" style="color: var(--brand-indigo);">
                             🔗 LinkedIn
@@ -91,7 +104,7 @@
 
             </div>
 
-            <!-- About Section Card -->
+            <!-- Biography Section Card -->
             <div class="premium-card bg-white border rounded-4 p-4 p-md-5 mb-4 shadow-sm">
                 <h5 class="fw-bold text-dark mb-3">About</h5>
                 <p class="text-secondary mb-0" style="line-height: 1.7; font-size: 0.95rem;">
@@ -108,8 +121,14 @@
                         <span class="text-muted">{{ profile_user.email|default:"Not shared publicly" }}</span>
                     </div>
                     <div class="col-sm-6">
-                        <span class="fw-semibold text-dark d-block mb-1">Member Status</span>
-                        <span class="text-muted">Active Platform User</span>
+                        <span class="fw-semibold text-dark d-block mb-1">Attached Resume</span>
+                        {% if profile_user.profile.cv %}
+                            <a href="{{ profile_user.profile.cv.url }}" download class="text-primary text-decoration-none fw-medium">
+                                <i class="bi bi-paperclip me-1"></i> {{ profile_user.profile.cv.name|slice:"5:" }}
+                            </a>
+                        {% else %}
+                            <span class="text-muted">No CV attached</span>
+                        {% endif %}
                     </div>
                 </div>
             </div>

@@ -13,6 +13,8 @@ class Profile(models.Model):
     role = models.CharField(max_length=10, choices=ROLE_CHOICES, default='student')
     avatar = models.ImageField(upload_to='avatars/', default='avatars/default.png', blank=True)
     bio = models.TextField(max_length=500, blank=True)
+
+    cv = models.FileField(upload_to='cvs/', blank=True, null=True)
     
     # Professional details
     graduation_year = models.IntegerField(null=True, blank=True)
@@ -92,7 +94,9 @@ class MentorshipSession(models.Model):
 class Message(models.Model):
     sender = models.ForeignKey(User, on_delete=models.CASCADE, related_name='sent_messages')
     receiver = models.ForeignKey(User, on_delete=models.CASCADE, related_name='received_messages')
-    content = models.TextField()
+    content = models.TextField(blank=True, null=True)
+    image = models.ImageField(upload_to='chat_images/', blank=True, null=True)
+    file_attachment = models.FileField(upload_to='chat_attachments/', blank=True, null=True)
     timestamp = models.DateTimeField(auto_now_add=True)
     is_read = models.BooleanField(default=False)
 
