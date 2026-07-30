@@ -1,138 +1,202 @@
 {% extends 'core/base.html' %}
 
-{% block title %}{{ profile_user.username }}'s Profile | AlumniSphere{% endblock %}
+{% block title %}{{ profile_user.first_name|default:profile_user.username }}'s Profile | AlumniSphere{% endblock %}
 
 {% block content %}
 <div class="container py-5">
-    <div class="row justify-content-center">
-        <div class="col-lg-8">
+    <!-- User Header Banner Card -->
+    <div class="card border-0 shadow-sm p-4 mb-4" style="background-color: #FAF9F5; border-radius: 12px;">
+        <div class="d-flex flex-column flex-md-row align-items-center align-items-md-start text-center text-md-start">
             
-            <!-- Main Profile Header Card -->
-            <div class="premium-card bg-white border rounded-4 p-4 p-md-5 mb-4 shadow-sm">
-                
-                <!-- Profile Identity Header -->
-                <div class="d-flex align-items-center gap-4 mb-4 pb-4 border-bottom">
-                    <!-- Avatar Display -->
-                    <div class="flex-shrink-0" style="width: 80px; height: 80px;">
-                        {% if profile_user.profile.avatar and profile_user.profile.avatar.url != '/media/avatars/default.png' %}
-                            <img src="{{ profile_user.profile.avatar.url }}" 
-                                 alt="Avatar" 
-                                 class="rounded-circle border shadow-sm w-100 h-100" 
-                                 style="object-fit: cover;">
-                        {% else %}
-                            <div class="rounded-circle bg-light border d-flex align-items-center justify-content-center fw-bold shadow-sm w-100 h-100" 
-                                 style="font-size: 1.8rem; color: var(--brand-indigo);">
-                                {{ profile_user.username|slice:":1"|upper }}
-                            </div>
-                        {% endif %}
+            <!-- User Initial Avatar Badge -->
+            <div class="mb-3 mb-md-0 me-md-4">
+                <div class="rounded-circle d-flex align-items-center justify-content-center shadow-sm text-white fw-bold fs-1" 
+                     style="width: 100px; height: 100px; background-color: #3B826E; border: 3px solid #FAF9F5; flex-shrink: 0;">
+                    {{ profile_user.username|first|upper }}
+                </div>
+            </div>
+
+            <!-- Profile Info & Meta -->
+            <div class="flex-grow-1">
+                <div class="d-flex flex-column flex-md-row align-items-center align-items-md-start justify-content-between">
+                    <div>
+                        <h2 class="fw-bold mb-1" style="color: #2D3748;">
+                            {% if profile_user.first_name %}
+                                {{ profile_user.first_name }} {{ profile_user.last_name }}
+                            {% else %}
+                                @{{ profile_user.username }}
+                            {% endif %}
+                        </h2>
+                        <p class="text-muted mb-2">@{{ profile_user.username }}</p>
                     </div>
 
-                    <!-- User Meta Info -->
-                    <div class="flex-grow-1 min-w-0">
-                        <div class="d-flex align-items-center gap-2 mb-1">
-                            <h3 class="fw-bold text-dark mb-0 text-truncate">
-                                {% if profile_user.first_name %}{{ profile_user.first_name }} {{ profile_user.last_name }}{% else %}{{ profile_user.username }}{% endif %}
-                            </h3>
-                            {% if profile_user.profile.role == 'alumni' %}
-                                <span class="badge bg-dark px-2.5 py-1 text-xs fw-semibold">Alumnus</span>
+                    <!-- Action & Connection Buttons -->
+                    <div class="mt-3 mt-md-0">
+                        {% if request.user == profile_user %}
+                            <a href="{% url 'edit_profile' %}" class="btn btn-outline-dark fw-semibold px-3 py-2" style="border-radius: 8px;">
+                                <i class="bi bi-pencil-square me-1"></i> Edit Profile
+                            </a>
+                        {% else %}
+                            {% if connection_status == 'connected' %}
+                                <a href="{% url 'chat_room' username=profile_user.username %}" class="btn text-white fw-semibold px-3 py-2" style="background-color: #3B826E; border-radius: 8px;">
+                                    <i class="bi bi-chat-dots-fill me-1"></i> Message
+                                </a>
+                            {% elif connection_status == 'sent_pending' %}
+                                <button class="btn btn-secondary px-3 py-2" disabled style="border-radius: 8px;">
+                                    <i class="bi bi-clock-history me-1"></i> Connection Pending
+                                </button>
+                            {% elif connection_status == 'received_pending' %}
+                                <a href="{% url 'accept_connection_request' username=profile_user.username %}" class="btn btn-success px-3 py-2" style="border-radius: 8px;">
+                                    <i class="bi bi-person-check-fill me-1"></i> Accept Request
+                                </a>
                             {% else %}
-                                <span class="badge bg-light text-secondary border px-2.5 py-1 text-xs fw-semibold">Student</span>
+                                <a href="{% url 'send_connection_request' username=profile_user.username %}" class="btn btn-outline-dark px-3 py-2" style="border-radius: 8px;">
+                                    <i class="bi bi-person-plus-fill me-1"></i> Connect
+                                </a>
                             {% endif %}
-                        </div>
 
-                        <p class="text-muted fw-medium small mb-2">@{{ profile_user.username }}</p>
-
-                        <div class="d-flex flex-wrap align-items-center gap-3 text-muted small">
-                            {% if profile_user.profile.job_title or profile_user.profile.company %}
-                                <span>💼 {{ profile_user.profile.job_title }}{% if profile_user.profile.job_title and profile_user.profile.company %} at {% endif %}{{ profile_user.profile.company }}</span>
+                            {% if profile_user.profile.role == 'alumni' or profile_user.profile.role == 'mentor' %}
+                                <a href="{% url 'book_session' username=profile_user.username %}" class="btn btn-dark fw-semibold px-3 py-2 ms-2" style="border-radius: 8px;">
+                                    <i class="bi bi-calendar-check me-1"></i> Book Mentorship
+                                </a>
                             {% endif %}
-                            {% if profile_user.profile.location %}
-                                <span>📍 {{ profile_user.profile.location }}</span>
-                            {% endif %}
-                            {% if profile_user.profile.graduation_year %}
-                                <span>🎓 Class of {{ profile_user.profile.graduation_year }}</span>
-                            {% endif %}
-                            <span>📅 Joined {{ profile_user.date_joined|date:"F Y" }}</span>
-                        </div>
+                        {% endif %}
                     </div>
                 </div>
 
-                <!-- Action Toolbar & Buttons -->
-                <div class="d-flex flex-wrap align-items-center gap-3">
-                    {% if profile_user != request.user %}
-                        <!-- Direct Message Button -->
-                        <a href="{% url 'chat_room' username=profile_user.username %}" class="btn btn-indigo px-4 py-2 fw-semibold d-inline-flex align-items-center gap-2">
-                            <i class="bi bi-chat-dots-fill"></i> Send Message
-                        </a>
-
-                        <!-- Connection Request State Handler -->
-                        {% if connection_status == 'connected' %}
-                            <span class="badge bg-success-subtle text-success py-2 px-3 border border-success-subtle">Connected</span>
-                        {% elif connection_status == 'sent_pending' %}
-                            <button class="btn btn-light border text-muted py-2 px-3 small" disabled>Request Sent</button>
-                        {% elif connection_status == 'received_pending' %}
-                            <a href="{% url 'accept_connection_request' username=profile_user.username %}" class="btn btn-success py-2 px-3 fw-semibold d-inline-flex align-items-center gap-1">
-                                <i class="bi bi-check-lg"></i> Accept Connection Request
-                            </a>
-                        {% else %}
-                            <a href="{% url 'send_connection_request' username=profile_user.username %}" class="btn btn-outline-secondary py-2 px-3">Connect Request</a>
-                        {% endif %}
-                    {% else %}
-                        <!-- Profile Owner Edit Button -->
-                        <a href="{% url 'edit_profile' %}" class="btn btn-light border px-4 py-2 fw-semibold">Edit Profile</a>
+                <!-- Professional Role Badges -->
+                <div class="d-flex flex-wrap align-items-center gap-2 mt-2">
+                    <span class="badge text-capitalize px-3 py-2 fw-normal" style="background-color: rgba(59, 130, 110, 0.15); color: #3B826E; font-size: 0.85rem;">
+                        <i class="bi bi-briefcase-fill me-1"></i> {{ profile_user.profile.role|default:"Member" }}
+                    </span>
+                    {% if profile_user.profile.job_title %}
+                        <span class="text-secondary small">
+                            <strong>{{ profile_user.profile.job_title }}</strong>
+                            {% if profile_user.profile.company %} at {{ profile_user.profile.company }}{% endif %}
+                        </span>
                     {% endif %}
-
-                    <!-- Download CV/Resume Button -->
-                    {% if profile_user.profile.cv %}
-                        <a href="{{ profile_user.profile.cv.url }}" download class="btn btn-outline-indigo px-3 py-2 fw-semibold d-inline-flex align-items-center gap-2">
-                            <i class="bi bi-file-earmark-pdf-fill text-danger fs-5"></i> Download CV
-                        </a>
+                    {% if profile_user.profile.location %}
+                        <span class="text-muted small ms-md-2">
+                            <i class="bi bi-geo-alt-fill text-danger me-1"></i> {{ profile_user.profile.location }}
+                        </span>
                     {% endif %}
+                </div>
 
-                    <!-- Social Channels Links -->
+                <!-- Bio -->
+                {% if profile_user.profile.bio %}
+                    <p class="mt-3 text-secondary small mb-2" style="line-height: 1.6;">
+                        {{ profile_user.profile.bio }}
+                    </p>
+                {% endif %}
+
+                <!-- Social Links & Resume -->
+                <div class="d-flex flex-wrap align-items-center gap-3 mt-3 pt-3 border-top">
                     {% if profile_user.profile.linkedin_url %}
-                        <a href="{{ profile_user.profile.linkedin_url }}" target="_blank" rel="noopener" class="btn btn-light border px-3 py-2 text-decoration-none small fw-semibold ms-auto" style="color: var(--brand-indigo);">
-                            🔗 LinkedIn
+                        <a href="{{ profile_user.profile.linkedin_url }}" target="_blank" class="text-decoration-none small text-secondary">
+                            <i class="bi bi-linkedin fs-5 me-1 text-primary"></i> LinkedIn
                         </a>
                     {% endif %}
                     {% if profile_user.profile.github_url %}
-                        <a href="{{ profile_user.profile.github_url }}" target="_blank" rel="noopener" class="btn btn-light border px-3 py-2 text-dark text-decoration-none small fw-semibold">
-                            💻 GitHub
+                        <a href="{{ profile_user.profile.github_url }}" target="_blank" class="text-decoration-none small text-secondary">
+                            <i class="bi bi-github fs-5 me-1 text-dark"></i> GitHub
+                        </a>
+                    {% endif %}
+                    {% if profile_user.profile.cv %}
+                        <a href="{{ profile_user.profile.cv.url }}" download class="btn btn-sm btn-outline-secondary">
+                            <i class="bi bi-file-earmark-pdf me-1"></i> Download Resume/CV
                         </a>
                     {% endif %}
                 </div>
-
             </div>
+        </div>
+    </div>
 
-            <!-- Biography Section Card -->
-            <div class="premium-card bg-white border rounded-4 p-4 p-md-5 mb-4 shadow-sm">
-                <h5 class="fw-bold text-dark mb-3">About</h5>
-                <p class="text-secondary mb-0" style="line-height: 1.7; font-size: 0.95rem;">
-                    {{ profile_user.profile.bio|default:"No biography provided yet."|linebreaks }}
-                </p>
+    <!-- Main Grid: Left Column Details & Right Column User Posts -->
+    <div class="row g-4">
+        <!-- Sidebar: Overview -->
+        <div class="col-lg-4">
+            <div class="card border-0 shadow-sm p-4" style="background-color: #FAF9F5; border-radius: 12px;">
+                <h5 class="fw-bold mb-3" style="color: #2D3748;">
+                    <i class="bi bi-info-circle-fill me-2" style="color: #3B826E;"></i>Overview
+                </h5>
+
+                <ul class="list-unstyled mb-0 text-secondary small">
+                    <li class="mb-3 d-flex align-items-center">
+                        <i class="bi bi-envelope me-2 text-muted fs-5"></i>
+                        <span>{{ profile_user.email }}</span>
+                    </li>
+                    <li class="mb-3 d-flex align-items-center">
+                        <i class="bi bi-mortarboard me-2 text-muted fs-5"></i>
+                        <span>Graduation Class: <strong>{{ profile_user.profile.graduation_year|default:"N/A" }}</strong></span>
+                    </li>
+                    <li class="d-flex align-items-center">
+                        <i class="bi bi-calendar3 me-2 text-muted fs-5"></i>
+                        <span>Joined: {{ profile_user.date_joined|date:"M Y" }}</span>
+                    </li>
+                </ul>
             </div>
+        </div>
 
-            <!-- Public Parameters Card -->
-            <div class="premium-card bg-white border rounded-4 p-4 shadow-sm">
-                <h6 class="fw-bold text-uppercase text-xs tracking-wider text-muted mb-3">Public Parameters</h6>
-                <div class="row g-3 text-sm">
-                    <div class="col-sm-6">
-                        <span class="fw-semibold text-dark d-block mb-1">Email Address</span>
-                        <span class="text-muted">{{ profile_user.email|default:"Not shared publicly" }}</span>
-                    </div>
-                    <div class="col-sm-6">
-                        <span class="fw-semibold text-dark d-block mb-1">Attached Resume</span>
-                        {% if profile_user.profile.cv %}
-                            <a href="{{ profile_user.profile.cv.url }}" download class="text-primary text-decoration-none fw-medium">
-                                <i class="bi bi-paperclip me-1"></i> {{ profile_user.profile.cv.name|slice:"5:" }}
-                            </a>
-                        {% else %}
-                            <span class="text-muted">No CV attached</span>
-                        {% endif %}
-                    </div>
+        <!-- Main Column: User Published Posts -->
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-sm p-4" style="background-color: #FAF9F5; border-radius: 12px;">
+                <div class="d-flex align-items-center justify-content-between mb-3">
+                    <h5 class="fw-bold mb-0" style="color: #2D3748;">
+                        <i class="bi bi-journal-text me-2" style="color: #3B826E;"></i>Posts & Activity
+                    </h5>
+                    <span class="badge rounded-pill bg-white text-dark border px-3 py-1">
+                        {{ user_posts.count }} Post{% if user_posts.count != 1 %}s{% endif %}
+                    </span>
                 </div>
-            </div>
 
+                {% if user_posts %}
+                    {% for post in user_posts %}
+                        <div class="card border-0 shadow-sm mb-3 p-3" style="background-color: #FFFFFF; border-radius: 8px;">
+                            <!-- Post Author Header -->
+                            <div class="d-flex align-items-center mb-2">
+                                <div class="rounded-circle d-flex align-items-center justify-content-center me-2 text-white fw-bold" 
+                                     style="width: 38px; height: 38px; background-color: #3B826E; flex-shrink: 0;">
+                                    {{ post.author.username|first|upper }}
+                                </div>
+                                <div>
+                                    <h6 class="mb-0 fw-semibold text-dark">@{{ post.author.username }}</h6>
+                                    <small class="text-muted">{{ post.created_at|timesince }} ago</small>
+                                </div>
+                            </div>
+
+                            <!-- Post Content -->
+                            <p class="card-text text-secondary mb-2" style="white-space: pre-line;">{{ post.content }}</p>
+
+                            <!-- Post Image -->
+                            {% if post.image %}
+                                <div class="mb-2 text-center">
+                                    <img src="{{ post.image.url }}" class="img-fluid rounded" style="max-height: 380px; width: 100%; object-fit: cover;">
+                                </div>
+                            {% endif %}
+
+                            <!-- Post File Attachment -->
+                            {% if post.file_attachment %}
+                                <div class="p-2 mb-2 rounded bg-light border d-inline-block">
+                                    <a href="{{ post.file_attachment.url }}" download class="text-decoration-none small text-dark fw-semibold">
+                                        <i class="bi bi-paperclip me-1 text-primary"></i> {{ post.file_attachment.name|cut:'post_files/' }}
+                                    </a>
+                                </div>
+                            {% endif %}
+
+                            <!-- Engagement Counter Footer -->
+                            <div class="d-flex align-items-center justify-content-between pt-2 border-top text-muted small">
+                                <span><i class="bi bi-heart-fill text-danger me-1"></i> {{ post.likes.count }} Likes</span>
+                                <span><i class="bi bi-chat-text me-1"></i> {{ post.comments.count }} Comments</span>
+                            </div>
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="text-center py-5 text-muted">
+                        <i class="bi bi-journal-x fs-1 d-block mb-2" style="color: #3B826E;"></i>
+                        <p class="mb-0 fw-semibold">No posts published yet by @{{ profile_user.username }}.</p>
+                    </div>
+                {% endif %}
+            </div>
         </div>
     </div>
 </div>

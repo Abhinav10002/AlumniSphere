@@ -5,7 +5,55 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.db import models
 from django.db.models import Q
-from core.models import Profile, Connection, Post, MentorshipSession, Message, Comment
+from django.core.mail import send_mail
+from django.utils.html import strip_tags
+
+from core.models import (
+    Profile,
+    Connection,
+    Post,
+    MentorshipSession,
+    Message,
+    Comment,
+    EmailOTP,
+)
+
+
+# ------------------------------------------------------------------
+# Email OTP Helper Function
+# ------------------------------------------------------------------
+
+def send_otp_email(email, otp_code, purpose):
+    """Sends a formatted HTML email containing the 6-digit OTP code."""
+    subject = f"AlumniSphere Security Code: {otp_code}"
+    
+    html_message = f"""
+    <div style="font-family: Arial, sans-serif; max-width: 500px; margin: 0 auto; padding: 20px; border: 1px solid #e0e0e0; border-radius: 8px;">
+        <h2 style="color: #3B826E; text-align: center;">AlumniSphere</h2>
+        <p>Hello,</p>
+        <p>Your verification code for <strong>{purpose}</strong> is:</p>
+        <div style="background-color: #F4F6F2; padding: 15px; text-align: center; border-radius: 6px; margin: 20px 0;">
+            <span style="font-size: 32px; font-weight: bold; letter-spacing: 5px; color: #3B826E;">{otp_code}</span>
+        </div>
+        <p style="color: #666; font-size: 14px;">This code is valid for 10 minutes. Please do not share it with anyone.</p>
+    </div>
+    """
+    
+    plain_message = strip_tags(html_message)
+    
+    send_mail(
+        subject=subject,
+        message=plain_message,
+        from_email='AlumniSphere <abhinavkumar12102@gmail.com>',
+        recipient_list=[email],
+        html_message=html_message,
+        fail_silently=False,
+    )
+
+
+# ------------------------------------------------------------------
+# Primary Navigation Views
+# ------------------------------------------------------------------
 
 @login_required
 def index(request):
@@ -25,8 +73,13 @@ def index(request):
         'query': query
     })
 
+
+# ------------------------------------------------------------------
+# Authentication & OTP Views
+# ------------------------------------------------------------------
+
 def login_view(request):
-    """Handles secure user authentication with message alerts."""
+    """Stages user for 6-digit login OTP verification."""
     if request.user.is_authenticated:
         return redirect('index')
         
@@ -36,16 +89,26 @@ def login_view(request):
         
         user = authenticate(request, username=username_input, password=password_input)
         if user is not None:
-            login(request, user)
-            messages.success(request, f"Welcome back, @{user.username}!")
-            return redirect('index')
+            # Save user in session prior to full authentication
+            request.session['pending_user_id'] = user.id
+            request.session['otp_target_email'] = user.email
+            request.session['otp_purpose'] = 'login'
+
+            # Generate and send OTP email
+            otp_record = EmailOTP.objects.create(user=user, email=user.email, purpose='login')
+            otp_record.generate_otp()
+            send_otp_email(user.email, otp_record.otp, 'login')
+
+            messages.info(request, f"Login OTP code sent to {user.email}")
+            return redirect('verify_otp')
         else:
             messages.error(request, "Invalid username or password configuration.")
             
     return render(request, 'core/login.html')
 
+
 def register_view(request):
-    """Processes signup data and spins up new active user records."""
+    """Caches signup parameters and sends registration verification OTP."""
     if request.user.is_authenticated:
         return redirect('index')
         
@@ -64,12 +127,103 @@ def register_view(request):
         elif User.objects.filter(email=email_input).exists():
             messages.error(request, "An account with that email address already exists.")
         else:
-            user = User.objects.create_user(username=username_input, email=email_input, password=password_input)
-            login(request, user)
-            messages.success(request, f"Account created successfully! Welcome to AlumniSphere, @{user.username}.")
-            return redirect('index')
+            # Cache registration parameters in session
+            request.session['pending_registration'] = {
+                'username': username_input,
+                'email': email_input,
+                'password': password_input,
+            }
+
+            # Generate and send OTP email
+            otp_record = EmailOTP.objects.create(email=email_input, purpose='register')
+            otp_record.generate_otp()
+            send_otp_email(email_input, otp_record.otp, 'registration')
+
+            request.session['otp_target_email'] = email_input
+            request.session['otp_purpose'] = 'register'
+
+            messages.info(request, f"Verification OTP sent to {email_input}")
+            return redirect('verify_otp')
             
     return render(request, 'core/register.html')
+
+
+def verify_otp_view(request):
+    """Verifies submitted OTP code and completes login/registration."""
+    target_email = request.session.get('otp_target_email')
+    purpose = request.session.get('otp_purpose')
+
+    if not target_email or not purpose:
+        messages.error(request, "Session expired. Please start the login process again.")
+        return redirect('login')
+
+    if request.method == 'POST':
+        user_otp = request.POST.get('otp', '').strip()
+
+        otp_record = EmailOTP.objects.filter(
+            email=target_email,
+            purpose=purpose,
+            is_verified=False
+        ).order_by('-created_at').first()
+
+        if otp_record and otp_record.is_valid() and otp_record.otp == user_otp:
+            otp_record.is_verified = True
+            otp_record.save()
+
+            if purpose == 'register':
+                reg_data = request.session.get('pending_registration')
+                if reg_data:
+                    user = User.objects.create_user(
+                        username=reg_data['username'],
+                        email=reg_data['email'],
+                        password=reg_data['password']
+                    )
+                    Profile.objects.get_or_create(user=user)
+                    login(request, user)
+
+                    # Clean up session
+                    del request.session['pending_registration']
+                    del request.session['otp_target_email']
+                    del request.session['otp_purpose']
+
+                    messages.success(request, f"Account created successfully! Welcome to AlumniSphere, @{user.username}.")
+                    return redirect('index')
+
+            elif purpose == 'login':
+                user_id = request.session.get('pending_user_id')
+                if user_id:
+                    user = User.objects.get(id=user_id)
+                    login(request, user)
+
+                    # Clean up session
+                    del request.session['pending_user_id']
+                    del request.session['otp_target_email']
+                    del request.session['otp_purpose']
+
+                    messages.success(request, f"Welcome back, @{user.username}!")
+                    return redirect('index')
+        else:
+            messages.error(request, "Invalid or expired OTP code. Please try again.")
+
+    return render(request, 'core/verify_otp.html', {'target_email': target_email})
+
+
+def resend_otp_view(request):
+    """Resends a fresh OTP code to the active target email."""
+    target_email = request.session.get('otp_target_email')
+    purpose = request.session.get('otp_purpose')
+
+    if target_email and purpose:
+        otp_record = EmailOTP.objects.create(email=target_email, purpose=purpose)
+        otp_record.generate_otp()
+        send_otp_email(target_email, otp_record.otp, purpose)
+        messages.success(request, f"A new verification code has been sent to {target_email}.")
+    else:
+        messages.error(request, "Session expired. Please try logging in again.")
+        return redirect('login')
+
+    return redirect('verify_otp')
+
 
 def logout_view(request):
     """Terminates user sessions securely."""
@@ -77,8 +231,13 @@ def logout_view(request):
     messages.info(request, "You have been logged out successfully.")
     return redirect('login')
 
+
+# ------------------------------------------------------------------
+# User Profile Views
+# ------------------------------------------------------------------
+
 def profile_view(request, username):
-    """Fetches profile context payload data and checks connection states."""
+    """Fetches profile context, connection status, and user-published posts."""
     profile_user = get_object_or_404(User, username=username)
     connection_status = None
     
@@ -96,11 +255,18 @@ def profile_view(request, username):
                     connection_status = 'sent_pending'
                 else:
                     connection_status = 'received_pending'
+
+    # Fetch all posts published by this specific user
+    user_posts = Post.objects.filter(author=profile_user).select_related(
+        'author', 'author__profile'
+    ).prefetch_related('likes', 'saved_by', 'comments').order_by('-created_at')
                     
     return render(request, 'core/profile.html', {
         'profile_user': profile_user,
-        'connection_status': connection_status
+        'connection_status': connection_status,
+        'user_posts': user_posts,
     })
+
 
 @login_required
 def edit_profile_view(request):
@@ -125,7 +291,6 @@ def edit_profile_view(request):
         profile.linkedin_url = request.POST.get('linkedin_url', '')
         profile.github_url = request.POST.get('github_url', '')
         
-        # Handle file uploads
         if 'avatar' in request.FILES:
             profile.avatar = request.FILES['avatar']
             
@@ -138,13 +303,12 @@ def edit_profile_view(request):
         
     return render(request, 'core/edit_profile.html', {'profile': profile})
 
+
 @login_required
 def directory_view(request):
     """Displays all platform members with search and role filtering."""
-    # Ensure every registered user has a Profile
     profiles = Profile.objects.select_related('user').all()
 
-    # Search query parameter ('q')
     query = request.GET.get('q', '').strip()
     if query:
         profiles = profiles.filter(
@@ -155,15 +319,16 @@ def directory_view(request):
             Q(company__icontains=query)
         )
 
-    # Role filter parameter ('role')
     role_filter = request.GET.get('role', '').strip()
     if role_filter:
         profiles = profiles.filter(role__iexact=role_filter)
 
-    context = {
-        'profiles': profiles,
-    }
-    return render(request, 'core/directory.html', context)
+    return render(request, 'core/directory.html', {'profiles': profiles})
+
+
+# ------------------------------------------------------------------
+# Connections Views
+# ------------------------------------------------------------------
 
 @login_required
 def send_connection_request(request, username):
@@ -173,6 +338,7 @@ def send_connection_request(request, username):
         Connection.objects.get_or_create(sender=request.user, receiver=receiver, status='pending')
         messages.success(request, f"Connection request sent to @{username}.")
     return redirect('profile', username=username)
+
 
 @login_required
 def accept_connection_request(request, username):
@@ -185,6 +351,11 @@ def accept_connection_request(request, username):
         messages.success(request, f"You are now connected with @{username}.")
     return redirect('profile', username=username)
 
+
+# ------------------------------------------------------------------
+# Network Feed & Engagement Views
+# ------------------------------------------------------------------
+
 @login_required
 def feed_view(request):
     """Fetches feed posts with preloaded comments and engagement metadata."""
@@ -192,6 +363,7 @@ def feed_view(request):
         'likes', 'saved_by', 'comments', 'comments__author', 'comments__author__profile'
     )
     return render(request, 'core/feed.html', {'posts': posts})
+
 
 @login_required
 def create_post_view(request):
@@ -214,6 +386,53 @@ def create_post_view(request):
 
     return redirect('feed')
 
+
+@login_required
+def toggle_like_post(request, post_id):
+    """Toggles like status for a post."""
+    post = get_object_or_404(Post, id=post_id)
+    if request.user in post.likes.all():
+        post.likes.remove(request.user)
+    else:
+        post.likes.add(request.user)
+    return redirect('feed')
+
+
+@login_required
+def add_comment_view(request, post_id):
+    """Submits a new comment on a post."""
+    post = get_object_or_404(Post, id=post_id)
+    if request.method == 'POST':
+        content = request.POST.get('content', '').strip()
+        if content:
+            Comment.objects.create(
+                post=post,
+                author=request.user,
+                content=content
+            )
+            messages.success(request, "Comment added.")
+        else:
+            messages.error(request, "Comment cannot be empty.")
+    return redirect('feed')
+
+
+@login_required
+def toggle_save_post(request, post_id):
+    """Bookmarks/Saves or unsaves a post."""
+    post = get_object_or_404(Post, id=post_id)
+    if request.user in post.saved_by.all():
+        post.saved_by.remove(request.user)
+        messages.info(request, "Post removed from your saved list.")
+    else:
+        post.saved_by.add(request.user)
+        messages.success(request, "Post saved successfully.")
+    return redirect('feed')
+
+
+# ------------------------------------------------------------------
+# Mentorship Dashboard Views
+# ------------------------------------------------------------------
+
 @login_required
 def dashboard_view(request):
     """Generates the mentorship dashboard panel."""
@@ -224,6 +443,7 @@ def dashboard_view(request):
         'sessions_as_student': my_sessions_as_student,
         'sessions_as_mentor': my_sessions_as_mentor,
     })
+
 
 @login_required
 def book_session_view(request, username):
@@ -249,6 +469,7 @@ def book_session_view(request, username):
             
     return render(request, 'core/book_session.html', {'mentor': mentor_user})
 
+
 @login_required
 def update_session_status(request, session_id, action):
     """Updates mentorship session states."""
@@ -264,6 +485,11 @@ def update_session_status(request, session_id, action):
         session.save()
         
     return redirect('dashboard')
+
+
+# ------------------------------------------------------------------
+# Direct Messaging & Context Processors
+# ------------------------------------------------------------------
 
 @login_required
 def chat_dashboard(request):
@@ -311,11 +537,25 @@ def chat_dashboard(request):
         'query': query
     })
 
+
 @login_required
 def chat_room(request, username):
-    """Handles 1:1 direct messaging threads with text, image, and document support."""
+    """Handles 1:1 direct messaging threads restricted strictly to accepted connections."""
     partner = get_object_or_404(User, username=username)
     
+    # Check connection status
+    is_connected = Connection.objects.filter(
+        (Q(sender=request.user, receiver=partner) | Q(sender=partner, receiver=request.user)),
+        status='accepted'
+    ).exists()
+
+    if not is_connected:
+        messages.warning(
+            request, 
+            f"You can only message @{username} once your connection request has been accepted."
+        )
+        return redirect('profile', username=username)
+
     if request.method == 'POST':
         content = request.POST.get('content', '').strip() or request.POST.get('body', '').strip()
         image = request.FILES.get('image')
@@ -331,13 +571,11 @@ def chat_room(request, username):
             )
         return redirect('chat_room', username=username)
     
-    # GET: Retrieve message history thread
     thread = Message.objects.filter(
         (Q(sender=request.user) & Q(receiver=partner)) |
         (Q(sender=partner) & Q(receiver=request.user))
     ).order_by('timestamp')
     
-    # Clear unread markers for incoming messages
     Message.objects.filter(sender=partner, receiver=request.user, is_read=False).update(is_read=True)
     
     return render(request, 'core/chat_room.html', {
@@ -345,50 +583,10 @@ def chat_room(request, username):
         'thread': thread,
     })
 
+
 def unread_messages_processor(request):
-    """Globally injects the count of unread incoming messages."""
+    """Globally injects the count of unread incoming messages into context templates."""
     if request.user.is_authenticated:
         count = Message.objects.filter(receiver=request.user, is_read=False).count()
         return {'unread_message_count': count, 'global_unread_count': count}
     return {'unread_message_count': 0, 'global_unread_count': 0}
-
-@login_required
-def toggle_like_post(request, post_id):
-    """Toggles like status for a post."""
-    post = get_object_or_404(Post, id=post_id)
-    if request.user in post.likes.all():
-        post.likes.remove(request.user)
-    else:
-        post.likes.add(request.user)
-    return redirect('feed')
-
-
-@login_required
-def add_comment_view(request, post_id):
-    """Submits a new comment on a post."""
-    post = get_object_or_404(Post, id=post_id)
-    if request.method == 'POST':
-        content = request.POST.get('content', '').strip()
-        if content:
-            Comment.objects.create(
-                post=post,
-                author=request.user,
-                content=content
-            )
-            messages.success(request, "Comment added.")
-        else:
-            messages.error(request, "Comment cannot be empty.")
-    return redirect('feed')
-
-
-@login_required
-def toggle_save_post(request, post_id):
-    """Bookmarks/Saves or unsaves a post."""
-    post = get_object_or_404(Post, id=post_id)
-    if request.user in post.saved_by.all():
-        post.saved_by.remove(request.user)
-        messages.info(request, "Post removed from your saved list.")
-    else:
-        post.saved_by.add(request.user)
-        messages.success(request, "Post saved successfully.")
-    return redirect('feed')

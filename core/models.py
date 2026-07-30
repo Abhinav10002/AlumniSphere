@@ -2,6 +2,11 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.db.models.signals import post_save
 from django.dispatch import receiver
+import random
+from django.db import models
+from django.contrib.auth.models import User
+from django.utils import timezone
+from datetime import timedelta
 
 class Profile(models.Model):
     ROLE_CHOICES = (
@@ -128,3 +133,29 @@ class Message(models.Model):
 
     def __str__(self):
         return f"From {self.sender.username} to {self.receiver.username} at {self.timestamp}"
+
+class EmailOTP(models.Model):
+    PURPOSE_CHOICES = (
+        ('register', 'Registration'),
+        ('login', 'Login'),
+    )
+
+    user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True, related_name='otps')
+    email = models.EmailField()
+    otp = models.CharField(max_length=6)
+    purpose = models.CharField(max_length=10, choices=PURPOSE_CHOICES)
+    created_at = models.DateTimeField(auto_now_add=True)
+    is_verified = models.BooleanField(default=False)
+
+    def generate_otp(self):
+        """Generates a random 6-digit numeric OTP string."""
+        self.otp = f"{random.randint(100000, 999999)}"
+        self.save()
+
+    def is_valid(self):
+        """Checks if OTP is unverified and created within the last 10 minutes."""
+        now = timezone.now()
+        return not self.is_verified and (now - self.created_at) < timedelta(minutes=10)
+
+    def __str__(self):
+        return f"{self.email} - {self.otp} ({self.purpose})"

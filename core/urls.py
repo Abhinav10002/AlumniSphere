@@ -33,4 +33,7 @@ urlpatterns = [
     path('feed/post/<int:post_id>/like/', views.toggle_like_post, name='toggle_like_post'),
     path('feed/post/<int:post_id>/comment/', views.add_comment_view, name='add_comment'),
     path('feed/post/<int:post_id>/save/', views.toggle_save_post, name='toggle_save_post'),
+
+    path('verify-otp/', views.verify_otp_view, name='verify_otp'),
+    path('resend-otp/', views.resend_otp_view, name='resend_otp'),
 ]
