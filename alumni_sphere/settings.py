@@ -30,7 +30,12 @@ SECRET_KEY = 'django-insecure-$#&eba&onrd1bs*4%vj5-v@#n5#amq5@kaztf2og#+c_q5tvus
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [
+    'alumnisphere-pfxd.onrender.com',
+    '127.0.0.1',
+    'localhost',
+    '.onrender.com',  
+]
 
 
 # Application definition
