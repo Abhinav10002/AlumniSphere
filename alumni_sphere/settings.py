@@ -100,7 +100,7 @@ DATABASES = {
 
 # Provide PyMySQL the exact SSL boolean context it expects
 DATABASES['default']['OPTIONS'] = {
-    'ssl': True
+    'ssl': {}
 }
 
 
