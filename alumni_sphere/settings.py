@@ -84,6 +84,13 @@ WSGI_APPLICATION = 'alumni_sphere.wsgi.application'
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
 # Database Configuration for Aiven MySQL
+import os
+import dj_database_url
+import pymysql
+
+pymysql.install_as_MySQLdb()
+
+# Parse database configuration from Aiven environment variables
 DATABASES = {
     'default': dj_database_url.config(
         default=f"mysql://{os.environ.get('DB_USER')}:{os.environ.get('DB_PASSWORD')}@{os.environ.get('DB_HOST')}:{os.environ.get('DB_PORT', '3306')}/{os.environ.get('DB_NAME')}",
@@ -91,11 +98,9 @@ DATABASES = {
     )
 }
 
-# Configure PyMySQL SSL dictionary options
+# Provide PyMySQL the exact SSL boolean context it expects
 DATABASES['default']['OPTIONS'] = {
-    'ssl': {
-        'ssl_disabled': False
-    }
+    'ssl': True
 }
 
 
