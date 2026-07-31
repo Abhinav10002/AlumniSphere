@@ -7,6 +7,7 @@ from django.db import models
 from django.db.models import Q
 from django.core.mail import send_mail
 from django.utils.html import strip_tags
+from django.conf import settings
 
 from core.models import (
     Profile,
@@ -24,7 +25,7 @@ from core.models import (
 # ------------------------------------------------------------------
 
 def send_otp_email(email, otp_code, purpose):
-    """Sends a formatted HTML email containing the 6-digit OTP code."""
+    """Sends a formatted HTML email containing the 6-digit OTP code cleanly with error handling."""
     subject = f"AlumniSphere Security Code: {otp_code}"
     
     html_message = f"""
@@ -40,15 +41,22 @@ def send_otp_email(email, otp_code, purpose):
     """
     
     plain_message = strip_tags(html_message)
+    sender_email = getattr(settings, 'DEFAULT_FROM_EMAIL', 'AlumniSphere <abhinavkumar12102@gmail.com>')
     
-    send_mail(
-        subject=subject,
-        message=plain_message,
-        from_email='AlumniSphere <abhinavkumar12102@gmail.com>',
-        recipient_list=[email],
-        html_message=html_message,
-        fail_silently=False,
-    )
+    try:
+        send_mail(
+            subject=subject,
+            message=plain_message,
+            from_email=sender_email,
+            recipient_list=[email],
+            html_message=html_message,
+            fail_silently=False,
+        )
+        return True
+    except Exception as e:
+        # Logs the error cleanly so network/socket issues don't crash the server
+        print(f"SMTP Error encountered during {purpose} email delivery: {e}")
+        return False
 
 
 # ------------------------------------------------------------------
@@ -97,9 +105,13 @@ def login_view(request):
             # Generate and send OTP email
             otp_record = EmailOTP.objects.create(user=user, email=user.email, purpose='login')
             otp_record.generate_otp()
-            send_otp_email(user.email, otp_record.otp, 'login')
+            
+            email_sent = send_otp_email(user.email, otp_record.otp, 'login')
+            if email_sent:
+                messages.info(request, f"Login OTP code sent to {user.email}")
+            else:
+                messages.warning(request, f"OTP generated! (Check server console if SMTP is blocked).")
 
-            messages.info(request, f"Login OTP code sent to {user.email}")
             return redirect('verify_otp')
         else:
             messages.error(request, "Invalid username or password configuration.")
@@ -137,24 +149,18 @@ def register_view(request):
             # Generate and send OTP email
             otp_record = EmailOTP.objects.create(email=email_input, purpose='register')
             otp_record.generate_otp()
-            send_otp_email(email_input, otp_record.otp, 'registration')
+            
+            email_sent = send_otp_email(email_input, otp_record.otp, 'registration')
 
             request.session['otp_target_email'] = email_input
             request.session['otp_purpose'] = 'register'
 
-            messages.info(request, f"Verification OTP sent to {email_input}")
-            return redirect('verify_otp')
+            if email_sent:
+                messages.info(request, f"Verification OTP sent to {email_input}")
+            else:
+                messages.warning(request, f"OTP generated! Please enter your verification code below.")
 
-            try:
-    send_mail(
-        subject='Your AlumniSphere Verification Code',
-        message=f'Your OTP code is {otp}',
-        from_email=settings.DEFAULT_FROM_EMAIL,
-        recipient_list=[user.email],
-        fail_silently=False
-    )
-except Exception as e:
-    print(f"SMTP Error encountered: {e}") # Logs to Render console without crashing the app
+            return redirect('verify_otp')
             
     return render(request, 'core/register.html')
 
