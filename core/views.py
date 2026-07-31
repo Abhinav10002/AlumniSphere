@@ -144,6 +144,17 @@ def register_view(request):
 
             messages.info(request, f"Verification OTP sent to {email_input}")
             return redirect('verify_otp')
+
+            try:
+    send_mail(
+        subject='Your AlumniSphere Verification Code',
+        message=f'Your OTP code is {otp}',
+        from_email=settings.DEFAULT_FROM_EMAIL,
+        recipient_list=[user.email],
+        fail_silently=False
+    )
+except Exception as e:
+    print(f"SMTP Error encountered: {e}") # Logs to Render console without crashing the app
             
     return render(request, 'core/register.html')
 
